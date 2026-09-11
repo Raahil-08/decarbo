@@ -1,0 +1,132 @@
+-- Seed activity types
+insert into activity_types (key, category, canonical_unit, scope, label_en, label_gu, label_hi, synonyms) values
+('grid_electricity', 'electricity', 'kWh', 'scope2', 'Grid Electricity', 'ગ્રીડ વીજળી', 'ग्रिड बिजली', array['units','kwh','bijli','વીજળી','बिजली','power','electricity']),
+('solar_onsite_generation', 'electricity', 'kWh', null, 'Solar Onsite Generation', 'ઓનસાઇટ સોલર ઉત્પાદન', 'ऑनसाइट सौर उत्पादन', array['solar','solar generation','rooftop solar']),
+('diesel', 'fuel', 'L', 'scope1', 'Diesel', 'ડીઝલ', 'डीजल', array['hsd','high speed diesel','dg fuel','diesel oil']),
+('petrol', 'fuel', 'L', 'scope1', 'Petrol', 'પેટ્રોલ', 'पेट्रोल', array['gasoline','motor spirit','ms']),
+('furnace_oil', 'fuel', 'kg', 'scope1', 'Furnace Oil', 'ફર્નેસ ઓઇલ', 'फर्नेस तेल', array['fo','lshs','heavy fuel oil','melting oil']),
+('lpg', 'fuel', 'kg', 'scope1', 'LPG', 'એલપીજી', 'एलपीजी', array['liquefied petroleum gas','commercial cylinder','lpg cylinder']),
+('natural_gas', 'fuel', 'm**3', 'scope1', 'Natural Gas', 'કુદરતી ગેસ', 'प्राकृतिक गैस', array['png','cng','piped natural gas','gas']),
+('coal', 'fuel', 'kg', 'scope1', 'Coal', 'કોલસો', 'कोयला', array['steam coal','coking coal','thermal coal']),
+('biomass_briquettes', 'fuel', 'kg', 'scope1', 'Biomass Briquettes', 'બાયોમાસ બ્રિકેટ્સ', 'बायोमास ब्रिकेट्स', array['white coal','bio coal','briquettes']),
+('brass_input_primary', 'material', 'kg', 'scope3', 'Primary Brass Input (Virgin)', 'પ્રાથમિક પિત્તળ (વર્જિન)', 'प्राथमिक पीतल (वर्जिन)', array['virgin brass','brass rod virgin','primary brass rod','is319']),
+('brass_input_secondary', 'material', 'kg', 'scope3', 'Secondary Brass Input (Recycled)', 'ગૌણ પિત્તળ (રિસાઇકલ્ડ)', 'द्वितीयक पीतल (रीसाइकिल)', array['recycled brass','brass scrap input','secondary brass rod']),
+('copper_input', 'material', 'kg', 'scope3', 'Copper Input', 'તાંબુ', 'तांबा', array['copper wire','copper cathode','virgin copper']),
+('steel_input', 'material', 'kg', 'scope3', 'Steel Input', 'સ્ટીલ', 'स्टील', array['mild steel','ms rod','ss input','steel bar']),
+('aluminium_input_primary', 'material', 'kg', 'scope3', 'Primary Aluminium Input (Virgin)', 'પ્રાથમિક એલ્યુમિનિયમ', 'प्राथमिक एल्युमिनियम', array['virgin aluminium','ingot','primary aluminium']),
+('aluminium_input_secondary', 'material', 'kg', 'scope3', 'Secondary Aluminium Input (Recycled)', 'ગૌણ એલ્યુમિનિયમ', 'द्वितीयक एल्युमिनियम', array['recycled aluminium','aluminium scrap']),
+('packaging_corrugated', 'material', 'kg', 'scope3', 'Corrugated Box Packaging', 'કાર્ટન બોક્સ પેકેજિંગ', 'कार्टन बॉक्स पैकेजिंग', array['cartons','boxes','corrugated sheet']),
+('packaging_plastic', 'material', 'kg', 'scope3', 'Plastic Packaging', 'પ્લાસ્ટિક પેકેજિંગ', 'प्लास्टिक पैकेजिंग', array['stretch film','polythene','plastic bags']),
+('cutting_oil', 'material', 'kg', 'scope3', 'Cutting Oil & Coolant', 'કટિંગ ઓઇલ અને કૂલન્ટ', 'कटिंग तेल और कूलेंट', array['neat cutting oil','soluble oil','coolant']),
+('road_freight_hgv', 'transport', 't*km', 'scope3', 'Road Freight (Heavy Goods Vehicle)', 'રોડ નૂર (HGV)', 'સड़क माल ढुलाई (HGV)', array['hgv freight','heavy truck','container transport']),
+('road_freight_lcv', 'transport', 't*km', 'scope3', 'Road Freight (Light Commercial Vehicle)', 'રોડ નૂર (LCV)', 'सड़क माल ढुलाई (LCV)', array['lcv freight','tempo','chhota hathi','pickup']),
+('waste_metal_scrap_recycled', 'waste', 'kg', 'scope3', 'Recycled Metal Scrap', 'રિસાઇકલ્ડ મેટલ ભંગાર', 'रीसाइकिल धातु स्क्रैप', array['brass swarf','metal chips','boring scrap']),
+('waste_paper_recycled', 'waste', 'kg', 'scope3', 'Recycled Paper Waste', 'રિસાઇકલ્ડ કાગળ કચરો', 'रीसाइकिल कागज कचरा', array['waste paper','used boxes']),
+('waste_general_landfill', 'waste', 'kg', 'scope3', 'General Waste to Landfill', 'સામાન્ય કચરો (લેન્ડફિલ)', 'सामान्य कचरा (लैंडफिल)', array['municipal waste','general refuse']),
+('waste_hazardous_incineration', 'waste', 'kg', 'scope3', 'Hazardous Waste Incineration', 'જોખમી કચરો (ઇન્સિનરેશન)', 'खतरनाक कचरा (भस्मीकरण)', array['spent coolant','grinding sludge','oil waste']),
+('water_supply', 'water', 'm**3', 'scope3', 'Purchased Water Supply', 'પાણી પુરવઠો', 'जल आपूर्ति', array['tanker water','borewell water','gidc water']),
+('production_output', 'production', 't', null, 'Finished Production Output', 'તૈયાર ઉત્પાદન આઉટપુટ', 'तैयार उत्पाद आउटपुट', array['finished goods','dispatch pieces','finished parts'])
+on conflict (key) do update set
+  category = excluded.category,
+  canonical_unit = excluded.canonical_unit,
+  scope = excluded.scope,
+  label_en = excluded.label_en,
+  label_gu = excluded.label_gu,
+  label_hi = excluded.label_hi,
+  synonyms = excluded.synonyms;
+
+-- Seed emission factors
+insert into emission_factors (activity_type, region, kgco2e_per_unit, per_unit, source_name, source_url, source_version, reference_year, valid_from, valid_to, verified, notes) values
+('grid_electricity', 'IN', 0.710, 'kWh', 'CEA CO2 Baseline Database', 'https://cea.nic.in', 'v21.0', 'FY2024-25', '2025-04-01', null, false, 'Provisional weighted average for Indian national grid'),
+('grid_electricity', 'IN', 0.727, 'kWh', 'CEA CO2 Baseline Database', 'https://cea.nic.in', 'v20.0', 'FY2023-24', '2024-04-01', '2025-03-31', false, 'Weighted average for Indian national grid FY23-24'),
+('solar_onsite_generation', 'GLOBAL', 0.0, 'kWh', 'IPCC / GHG Protocol', null, 'v1.0', '2024', null, null, true, 'Zero direct operational emissions by definition'),
+('diesel', 'GLOBAL', 2.68, 'L', 'IPCC 2006 Guidelines', 'https://www.ipcc-nggip.iges.or.jp', '2006 Vol 2', '2006', null, null, false, '74.1 tCO2/TJ, NCV 43 GJ/t, density 0.84 kg/L'),
+('petrol', 'GLOBAL', 2.29, 'L', 'IPCC 2006 Guidelines', 'https://www.ipcc-nggip.iges.or.jp', '2006 Vol 2', '2006', null, null, false, '69.3 tCO2/TJ motor gasoline default'),
+('furnace_oil', 'GLOBAL', 3.13, 'kg', 'IPCC 2006 Guidelines', 'https://www.ipcc-nggip.iges.or.jp', '2006 Vol 2', '2006', null, null, false, 'Residual fuel oil 77.4 tCO2/TJ, NCV 40.4 GJ/t'),
+('lpg', 'GLOBAL', 2.98, 'kg', 'IPCC 2006 Guidelines', 'https://www.ipcc-nggip.iges.or.jp', '2006 Vol 2', '2006', null, null, false, '63.1 tCO2/TJ, NCV 47.3 GJ/t'),
+('natural_gas', 'GLOBAL', 2.02, 'm**3', 'IPCC 2006 Guidelines', 'https://www.ipcc-nggip.iges.or.jp', '2006 Vol 2', '2006', null, null, false, '56.1 tCO2/TJ default'),
+('coal', 'IN', 1.55, 'kg', 'IPCC / CEA India', null, '2006/2024', '2024', null, null, false, 'Indian non-coking coal typical grade GCV'),
+('biomass_briquettes', 'GLOBAL', 0.03, 'kg', 'IPCC 2006 Guidelines', null, '2006 Vol 2', '2006', null, null, false, 'Non-CO2 gases (CH4 and N2O) only'),
+('brass_input_primary', 'GLOBAL', 4.0, 'kg', 'ICE Database / LCA Estimate', 'https://circularecology.com', 'v3.0', '2024', null, null, false, 'Virgin brass rod IS319 (approx 60Cu 40Zn)'),
+('brass_input_secondary', 'GLOBAL', 1.0, 'kg', 'ICE Database / Recycled Brass', 'https://circularecology.com', 'v3.0', '2024', null, null, false, 'Secondary remelted brass rod with scrap loop'),
+('copper_input', 'GLOBAL', 3.8, 'kg', 'International Copper Association', 'https://copperalliance.org', '2024', '2024', null, null, false, 'Primary copper cathode / wire'),
+('steel_input', 'IN', 2.5, 'kg', 'Indian Steel LCA / Ministry of Steel', null, '2024', '2024', null, null, false, 'BF-BOF Indian blast furnace steel average'),
+('aluminium_input_primary', 'IN', 18.0, 'kg', 'International Aluminium Institute', 'https://world-aluminium.org', '2024', '2024', null, null, false, 'Coal-powered Indian smelting grid average'),
+('aluminium_input_secondary', 'GLOBAL', 0.6, 'kg', 'International Aluminium Institute', 'https://world-aluminium.org', '2024', '2024', null, null, false, 'Secondary remelted aluminium ingot'),
+('packaging_corrugated', 'GLOBAL', 0.9, 'kg', 'UK DEFRA / ICE', 'https://www.gov.uk', '2024', '2024', null, null, false, 'Corrugated cardboard boxes'),
+('packaging_plastic', 'GLOBAL', 2.3, 'kg', 'UK DEFRA Conversion Factors', 'https://www.gov.uk', '2024', '2024', null, null, false, 'LDPE stretch film & polythene bags'),
+('cutting_oil', 'GLOBAL', 1.5, 'kg', 'DEFRA / Ecoinvent proxy', null, '2024', '2024', null, null, false, 'Lubricants and industrial neat/soluble cutting oils'),
+('road_freight_hgv', 'GLOBAL', 0.10, 't*km', 'UK DEFRA Conversion Factors', 'https://www.gov.uk', '2024', '2024', null, null, false, 'Heavy goods vehicle average laden'),
+('road_freight_lcv', 'GLOBAL', 0.45, 't*km', 'UK DEFRA Conversion Factors', 'https://www.gov.uk', '2024', '2024', null, null, false, 'Light commercial vehicle (<3.5t)'),
+('waste_metal_scrap_recycled', 'GLOBAL', 0.021, 'kg', 'UK DEFRA Conversion Factors', 'https://www.gov.uk', '2024', '2024', null, null, false, 'Closed-loop metal scrap collection and transport'),
+('waste_paper_recycled', 'GLOBAL', 0.021, 'kg', 'UK DEFRA Conversion Factors', 'https://www.gov.uk', '2024', '2024', null, null, false, 'Paper and card recycling'),
+('waste_general_landfill', 'GLOBAL', 0.47, 'kg', 'UK DEFRA Conversion Factors', 'https://www.gov.uk', '2024', '2024', null, null, false, 'Commercial & industrial general waste to landfill'),
+('waste_hazardous_incineration', 'GLOBAL', 0.60, 'kg', 'DEFRA / EPA proxy', null, '2024', '2024', null, null, false, 'Hazardous oily waste and sludge incineration'),
+('water_supply', 'GLOBAL', 0.15, 'm**3', 'UK DEFRA Conversion Factors', 'https://www.gov.uk', '2024', '2024', null, null, false, 'Mains / purchased tanker water treatment & distribution')
+on conflict (activity_type, region, source_version) do update set
+  kgco2e_per_unit = excluded.kgco2e_per_unit,
+  per_unit = excluded.per_unit,
+  source_name = excluded.source_name,
+  source_url = excluded.source_url,
+  reference_year = excluded.reference_year,
+  valid_from = excluded.valid_from,
+  valid_to = excluded.valid_to,
+  verified = excluded.verified,
+  notes = excluded.notes;
+
+-- Seed benchmarks
+insert into benchmarks (industry, metric, value_low, value_mode, value_high, source_name, verified) values
+('brass_components', 'kwh_per_t_output', 1800, 2100, 2600, 'BEE Jamnagar Brass Cluster Energy Audit', false),
+('brass_components', 'kgco2e_per_t_output', 5000, 7200, 9500, 'Jamnagar SME Industrial Baseline Report', false),
+('foundry', 'kwh_per_t_output', 600, 850, 1200, 'BEE Foundry Cluster Energy Study', false),
+('foundry', 'kgco2e_per_t_output', 1200, 1800, 2500, 'National Clean Foundry Study', false)
+on conflict (industry, metric) do update set
+  value_low = excluded.value_low,
+  value_mode = excluded.value_mode,
+  value_high = excluded.value_high,
+  source_name = excluded.source_name,
+  verified = excluded.verified;
+
+
+-- Seed interventions
+insert into interventions (code, title_en, title_gu, title_hi, description_en, description_gu, description_hi, category, industries, pool, effect_type, effect_params, capex_model, savings_model, lifetime_years, difficulty, downtime_days, circularity_points, requires, conflicts, applicability, source_name, verified) values
+('CA_LEAK_FIX', 'Find and fix compressed-air leaks', 'કોમ્પ્રેસ્ડ-એર લીક શોધો અને ઠીક કરો', 'कंप्रेस्ड-एयर लीकेज खोजें और ठीक करें', 'Ultrasonic acoustic leak detection and sealing across distribution lines', 'વિતરણ લાઇનોમાં અલ્ટ્રાસોનિક એકોસ્ટિક લીક શોધ અને સીલિંગ', 'वितरण लाइनों में अल्ट्रासोनिक ध्वनिक रिसाव का पता लगाना और सीलिंग', 'energy_efficiency', array['*'], 'grid_kwh', 'reduce_fraction', '{"share_of_pool":0.15,"share_low":0.10,"share_high":0.25,"reduction":0.20,"reduction_low":0.10,"reduction_high":0.30}'::jsonb, '{"type":"fixed","mode":40000,"low":20000,"high":80000}'::jsonb, '{"type":"energy_kwh","annual_opex_inr":0}'::jsonb, 2, 1, 0, 0, array[]::text[], array[]::text[], '{"min_pool_share":0.02}'::jsonb, 'BEE Energy Audit SME Jamnagar', false),
+('CA_VFD_PRESSURE', 'Variable-speed compressor and lower line pressure', 'વેરિયેબલ-સ્પીડ કોમ્પ્રેસર અને લોઅર લાઇન પ્રેશર', 'वेरिएबल-स्पीड कंप्रेसर और कम लाइन दबाव', 'Install VFD screw compressor and reduce main header pressure by 1 bar', 'VFD સ્ક્રૂ કોમ્પ્રેસર ઇન્સ્ટોલ કરો અને મુખ્ય હેડર પ્રેશર 1 બાર ઘટાડો', 'वीएफडी स्क्रू कंप्रेसर स्थापित करें और मुख्य हेडर दबाव 1 बार कम करें', 'energy_efficiency', array['*'], 'grid_kwh', 'reduce_fraction', '{"share_of_pool":0.15,"share_low":0.10,"share_high":0.25,"reduction":0.15,"reduction_low":0.08,"reduction_high":0.25}'::jsonb, '{"type":"fixed","mode":350000,"low":250000,"high":500000}'::jsonb, '{"type":"energy_kwh","annual_opex_inr":10000}'::jsonb, 10, 2, 1, 0, array[]::text[], array[]::text[], '{"min_pool_share":0.02}'::jsonb, 'BEE Guide on Compressed Air', false),
+('CNC_IDLE_STANDBY', 'Auto-standby for idle CNC machines', 'નિષ્ક્રિય CNC મશીનો માટે ઓટો-સ્ટેન્ડબાય', 'निष्क्रिय सीएनसी मशीनों के लिए ऑटो-स्टैंडबाय', 'Automated standby interlock for hydraulics and pumps on idle CNC machines', 'નિષ્ક્રિય CNC મશીનો પર હાઇડ્રોલિક્સ અને પંપ માટે સ્વચાલિત સ્ટેન્ડબાય', 'निष्क्रिय सीएनसी मशीनों पर हाइड्रोलिक्स और पंपों के लिए स्वचालित स्टैंडबाय', 'energy_efficiency', array['*'], 'grid_kwh', 'reduce_fraction', '{"share_of_pool":0.45,"share_low":0.35,"share_high":0.60,"reduction":0.08,"reduction_low":0.04,"reduction_high":0.12}'::jsonb, '{"type":"fixed","mode":150000,"low":80000,"high":300000}'::jsonb, '{"type":"energy_kwh","annual_opex_inr":0}'::jsonb, 8, 2, 0, 0, array[]::text[], array[]::text[], '{"min_pool_share":0.05}'::jsonb, 'SME CNC Productivity Study', false),
+('IE3_MOTORS', 'Replace old motors with IE3/IE4', 'જૂના મોટર્સને IE3/IE4 સાથે બદલો', 'पुराने मोटर्स को IE3/IE4 से बदलें', 'Retrofit standard efficiency pump and blower motors with premium IE3 motors', 'પ્રીમિયમ IE3 મોટર્સ સાથે જૂની મોટર્સ રેટ્રોફિટ કરો', 'प्रीमियम IE3 मोटर्स के साथ पुरानी मोटरों को बदलें', 'energy_efficiency', array['*'], 'grid_kwh', 'reduce_fraction', '{"share_of_pool":0.20,"share_low":0.15,"share_high":0.30,"reduction":0.05,"reduction_low":0.03,"reduction_high":0.08}'::jsonb, '{"type":"fixed","mode":300000,"low":200000,"high":450000}'::jsonb, '{"type":"energy_kwh","annual_opex_inr":0}'::jsonb, 15, 2, 1, 0, array[]::text[], array[]::text[], '{"min_pool_share":0.05}'::jsonb, 'BEE Premium Efficiency Motors', false),
+('LED_LIGHTING', 'LED factory lighting with daylight sensors', 'ડેલાઇટ સેન્સર્સ સાથે એલઇડી લાઇટિંગ', 'डेलाइट सेंसर के साथ एलईडी फैक्ट्री लाइटिंग', 'Replace metal halide lamps with smart dimming industrial LEDs', 'મેટલ હેલાઇડ લેમ્પને સ્માર્ટ ડિમિંગ ઇન્ડસ્ટ્રીયલ એલઇડીથી બદલો', 'मेटल हैलाइड लैंप को स्मार्ट डिमिंग औद्योगिक एलईडी से बदलें', 'energy_efficiency', array['*'], 'grid_kwh', 'reduce_fraction', '{"share_of_pool":0.05,"share_low":0.03,"share_high":0.08,"reduction":0.50,"reduction_low":0.40,"reduction_high":0.60}'::jsonb, '{"type":"fixed","mode":120000,"low":80000,"high":200000}'::jsonb, '{"type":"energy_kwh","annual_opex_inr":0}'::jsonb, 8, 1, 0, 0, array[]::text[], array[]::text[], '{"min_pool_share":0.01}'::jsonb, 'Standard Lighting Audit', false),
+('SOLAR_ROOFTOP', 'Rooftop solar for own use', 'પોતાના ઉપયોગ માટે રૂફટોપ સોલર', 'स्वयं के उपयोग के लिए रूफटॉप सोलर', 'Grid-tied rooftop solar PV plant for captive daytime consumption', 'કેપ્ટિવ વપરાશ માટે ગ્રીડ-ટાઇડ રૂફટોપ સોલર પીવી પ્લાન્ટ', 'कैप्टिव खपत के लिए ग्रिड-बंधे रूफटॉप सौर पीवी संयंत्र', 'renewable', array['*'], 'grid_kwh', 'onsite_generation', '{"levels_kwp":[25,50,75,100,150,200,300],"yield_kwh_per_kwp":1500,"yield_low":1350,"yield_high":1650,"annual_opex_per_kwp_inr":500}'::jsonb, '{"type":"per_kwp","mode":45000,"low":40000,"high":55000}'::jsonb, '{"type":"energy_kwh","annual_opex_per_kwp_inr":500}'::jsonb, 25, 2, 0, 2, array[]::text[], array[]::text[], '{"min_pool_share":0.05}'::jsonb, 'MNRE Rooftop Solar Benchmarks', false),
+('FURNACE_INSULATION', 'Better refractory and insulation on melting furnace', 'મેલ્ટિંગ ફર્નેસ પર વધુ સારું રિફ્રેક્ટરી અને ઇન્સ્યુલેશન', 'मेल्टिंग फर्नेस पर बेहतर दुर्दम्य सामग्री और इन्सुलेशन', 'Upgrade furnace lining with ceramic fiber blanket and insulated lids', 'સિરામિક ફાઇબર અને ઇન્સ્યુલેટેડ ઢાંકણા સાથે ફર્નેસ લાઇનિંગ અપગ્રેડ કરો', 'सिरेमिक फाइबर और इंसुलेटेड ढक्कन के साथ भट्टी के अस्तर को अपग्रेड करें', 'energy_efficiency', array['brass_components','foundry','other'], 'melting_fuel', 'reduce_fraction', '{"share_of_pool":1.0,"reduction":0.12,"reduction_low":0.08,"reduction_high":0.20}'::jsonb, '{"type":"fixed","mode":150000,"low":100000,"high":250000}'::jsonb, '{"type":"fuel"}'::jsonb, 5, 2, 2, 0, array[]::text[], array['INDUCTION_FURNACE'], '{"requires_activity":["furnace_oil","lpg","natural_gas","coal"]}'::jsonb, 'TERI Foundry Energy Efficiency', false),
+('FURNACE_HEAT_RECOVERY', 'Furnace flue gas heat recovery', 'વેસ્ટ હીટ રિકવરી સિસ્ટમ', 'फर्नेस फ्लू गैस अपशिष्ट ताप वसूली', 'Recover flue gas waste heat via recuperator to preheat combustion air', 'કમ્બશન હવાને પ્રીહિટ કરવા માટે ફ્લુ ગેસ વેસ્ટ હીટ પુનઃપ્રાપ્ત કરો', 'दहन हवा को पहले से गर्म करने के लिए अपशिष्ट गर्मी पुनर्प्राप्त करें', 'energy_efficiency', array['brass_components','foundry','other'], 'melting_fuel', 'reduce_fraction', '{"share_of_pool":1.0,"reduction":0.15,"reduction_low":0.10,"reduction_high":0.25}'::jsonb, '{"type":"fixed","mode":400000,"low":300000,"high":600000}'::jsonb, '{"type":"fuel"}'::jsonb, 10, 3, 3, 1, array[]::text[], array['INDUCTION_FURNACE'], '{"requires_activity":["furnace_oil","lpg","natural_gas"]}'::jsonb, 'BEE Waste Heat Recovery Guide', false),
+('INDUCTION_FURNACE', 'Switch oil melting to electric induction furnace', 'ઓઇલ મેલ્ટિંગમાંથી ઇલેક્ટ્રિક ઇન્ડક્શન ફર્નેસમાં ફેરબદલ', 'तेल भट्टी को इलेक्ट्रिक इंडक्शन फर्नेस में बदलें', 'Replace inefficient oil crucible furnace with medium-frequency induction melting', 'તેલ ભઠ્ઠીને મધ્યમ-આવર્તન ઇન્ડક્શન મેલ્ટિંગથી બદલો', 'तेल क्रूसिबल भट्टी को इंडक्शन मेल्टिंग से बदलें', 'fuel_switch', array['brass_components','foundry','other'], 'melting_fuel', 'fuel_to_electric', '{"fraction":1.0,"fuel_efficiency":0.20,"fuel_eff_low":0.15,"fuel_eff_high":0.30,"electric_efficiency":0.65,"electric_eff_low":0.55,"electric_eff_high":0.75}'::jsonb, '{"type":"fixed","mode":1800000,"low":1200000,"high":2500000}'::jsonb, '{"type":"fuel_to_electric","annual_opex_inr":25000}'::jsonb, 15, 4, 7, 0, array[]::text[], array['FURNACE_INSULATION','FURNACE_HEAT_RECOVERY'], '{"requires_activity":["furnace_oil","coal"]}'::jsonb, 'Jamnagar Brass Cluster Study', false),
+('RECYCLED_BRASS_ROD', 'Buy higher recycled-content brass rod', 'ઉચ્ચ રિસાઇકલ્ડ કન્ટેન્ટ ધરાવતી પિત્તળની રોડ ખરીદો', 'उच्च रीसाइकिल्ड सामग्री वाली पीतल की रॉड खरीदें', 'Shift raw material purchases towards certified high secondary content rod', 'પ્રમાણિત ઉચ્ચ ગૌણ સામગ્રી રોડ તરફ કાચા માલની ખરીદી શિફ્ટ કરો', 'उच्च माध्यमिक सामग्री रॉड की ओर कच्चे माल की खरीद स्थानांतरित करें', 'material_circularity', array['brass_components','other'], 'brass_input', 'shift_to_secondary', '{"levels":[0.4,0.6,0.8],"price_diff_inr_per_kg":0.0,"price_diff_low":-10.0,"price_diff_high":15.0}'::jsonb, '{"type":"fixed","mode":50000,"low":25000,"high":100000}'::jsonb, '{"type":"material_price_diff"}'::jsonb, 5, 2, 0, 8, array[]::text[], array[]::text[], '{"min_pool_share":0.10}'::jsonb, 'Circular Metals Initiative', false),
+('SWARF_SEGREGATION_LOOP', 'Segregate brass swarf and return to supplier', 'સ્વચ્છ પિત્તળના કચરાને અલગ કરો અને સપ્લાયરને પરત કરો', 'स्वच्छ पीतल स्क्रैप को अलग करें और सप्लायर को लौटाएं', 'Clean alloy-specific chip segregation with chip wringer and direct supplier buy-back', 'ચિપ રિંગર અને ડાયરેક્ટ સપ્લાયર બાય-બેક સાથે સ્વચ્છ એલોય ચિપ અલગ કરો', 'चिप रिंगर और डायरेक्ट सप्लायर बाय-बैक के साथ स्क्रैप पृथक्करण', 'waste_circularity', array['brass_components','other'], 'brass_input', 'shift_to_secondary', '{"delta":0.15,"delta_low":0.10,"delta_high":0.25,"scrap_value_gain_inr_per_kg":20.0,"scrap_gain_low":10.0,"scrap_gain_high":40.0}'::jsonb, '{"type":"fixed","mode":200000,"low":120000,"high":300000}'::jsonb, '{"type":"material_price_diff"}'::jsonb, 8, 2, 0, 10, array[]::text[], array[]::text[], '{"min_pool_share":0.10}'::jsonb, 'Jamnagar Scrap Recycling Practices', false),
+('CHIP_WRINGER_OIL', 'Centrifuge swarf to recover cutting oil', 'કટિંગ ઓઇલ પુનઃપ્રાપ્ત કરવા માટે ચિપ રિંગર સેન્ટ્રીફ્યુજ', 'कटिंग तेल की वसूली के लिए चिप रिंगर सेंट्रीफ्यूज', 'High-speed centrifugal chip wringer to recover 90% of adhering neat cutting oil', 'ચિપ્સમાંથી 90% ચોંટેલું કટિંગ ઓઇલ પુનઃપ્રાપ્ત કરવા માટે સેન્ટ્રીફ્યુજ', 'चिप्स से 90% चिपके कटिंग तेल की वसूली के लिए सेंट्रीफ्यूज', 'waste_circularity', array['brass_components','other'], 'cutting_oil', 'reduce_fraction', '{"share_of_pool":1.0,"reduction":0.30,"reduction_low":0.20,"reduction_high":0.50}'::jsonb, '{"type":"fixed","mode":250000,"low":150000,"high":400000}'::jsonb, '{"type":"cost_share"}'::jsonb, 10, 2, 0, 6, array[]::text[], array[]::text[], '{"min_pool_share":0.005}'::jsonb, 'Machining Lubricant Recovery', false),
+('COOLANT_RECYCLING', 'Coolant filtration and skimming system', 'કૂલન્ટ ફિલ્ટરેશન સિસ્ટમ', 'कूलेंट निस्पंदन और स्किमिंग सिस्टम', 'Coalescing tramp oil skimmer and ultra-filtration for extended coolant life', 'વિસ્તૃત કૂલન્ટ જીવન માટે ટ્રેમ્પ ઓઇલ સ્કિમર અને ફિલ્ટરેશન', 'कूलेंट का जीवन बढ़ाने के लिए ट्रैम्प ऑयल स्किमर और अल्ट्रा-फिल्ट्रेशन', 'waste_circularity', array['brass_components','other'], 'hazardous_waste', 'reduce_fraction', '{"share_of_pool":1.0,"reduction":0.40,"reduction_low":0.25,"reduction_high":0.60}'::jsonb, '{"type":"fixed","mode":150000,"low":100000,"high":250000}'::jsonb, '{"type":"cost_share"}'::jsonb, 8, 2, 0, 6, array[]::text[], array[]::text[], '{"min_pool_share":0.005}'::jsonb, 'Hazardous Waste Minimization Guide', false),
+('REUSABLE_CRATES', 'Returnable crates for finished parts dispatch', 'નિયમિત ગ્રાહકો માટે રિટર્નેબલ ક્રેટ્સ', 'वापसी योग्य प्लास्टिक क्रेट प्रणाली', 'Transition from corrugated single-use boxes to collapsible returnable plastic crates', 'સિંગલ-યુઝ બોક્સમાંથી કોલેપ્સિબલ પ્લાસ્ટિક ક્રેટ્સમાં રૂપાંતર', 'सिंगल-यूज़ बॉक्स से बंधनेवाला प्लास्टिक क्रेट में बदलाव', 'material_circularity', array['*'], 'packaging', 'reduce_fraction', '{"share_of_pool":0.50,"share_low":0.30,"share_high":0.70,"reduction":0.80,"reduction_low":0.60,"reduction_high":0.90}'::jsonb, '{"type":"fixed","mode":150000,"low":100000,"high":250000}'::jsonb, '{"type":"cost_share"}'::jsonb, 5, 2, 0, 7, array[]::text[], array[]::text[], '{"min_pool_share":0.005}'::jsonb, 'Automotive Supply Chain Packaging', false),
+('FREIGHT_CONSOLIDATION', 'Consolidate freight dispatches into fuller truckloads', 'વધુ સંપૂર્ણ ટ્રક લોડમાં ડિસ્પેચ એકીકૃત કરો', 'प्रेषण को पूर्ण ट्रक लोड में समेकित करें', 'Route scheduling and consignment consolidation to increase vehicle load factor', 'વાહનના ભાર પરિબળને વધારવા માટે રૂટ શેડ્યૂલિંગ અને કન્સાઇનમેન્ટ એકત્રીકરણ', 'वाहन भार कारक बढ़ाने के लिए रूट शेड्यूलिंग और समेकन', 'transport', array['*'], 'freight', 'reduce_fraction', '{"share_of_pool":1.0,"reduction":0.12,"reduction_low":0.05,"reduction_high":0.20}'::jsonb, '{"type":"fixed","mode":20000,"low":10000,"high":50000}'::jsonb, '{"type":"cost_share"}'::jsonb, 3, 1, 0, 0, array[]::text[], array[]::text[], '{"min_pool_share":0.01}'::jsonb, 'Logistics Efficiency Best Practice', false),
+('DG_REDUCTION', 'Battery backup for critical loads', 'ડીઝલ જનરેટર ઘટાડવા માટે બેટરી બેકઅપ', 'डीजल जनरेटर कम करने के लिए बैटरी बैकअप', 'Lithium-ion BESS to support controls during brief outages and cut DG idle hours', 'ટૂંકા આઉટેજ દરમિયાન નિયંત્રણોને ટેકો આપવા માટે લિથિયમ-આયન BESS', 'आउटेज के दौरान नियंत्रणों का समर्थन करने के लिए लिथियम-आयन बैटरी', 'energy_efficiency', array['*'], 'dg_diesel', 'reduce_fraction', '{"share_of_pool":1.0,"reduction":0.50,"reduction_low":0.30,"reduction_high":0.70,"side_effects":[{"pool":"grid_kwh","per_unit_removed":3.0}]}'::jsonb, '{"type":"fixed","mode":600000,"low":400000,"high":900000}'::jsonb, '{"type":"fuel"}'::jsonb, 8, 3, 0, 0, array[]::text[], array[]::text[], '{"min_pool_share":0.01}'::jsonb, 'Clean Energy Backup Guide', false)
+on conflict (code) do update set
+  title_en = excluded.title_en,
+  title_gu = excluded.title_gu,
+  title_hi = excluded.title_hi,
+  description_en = excluded.description_en,
+  description_gu = excluded.description_gu,
+  description_hi = excluded.description_hi,
+  category = excluded.category,
+  industries = excluded.industries,
+  pool = excluded.pool,
+  effect_type = excluded.effect_type,
+  effect_params = excluded.effect_params,
+  capex_model = excluded.capex_model,
+  savings_model = excluded.savings_model,
+  lifetime_years = excluded.lifetime_years,
+  difficulty = excluded.difficulty,
+  downtime_days = excluded.downtime_days,
+  circularity_points = excluded.circularity_points,
+  requires = excluded.requires,
+  conflicts = excluded.conflicts,
+  applicability = excluded.applicability,
+  source_name = excluded.source_name,
+  verified = excluded.verified;
+

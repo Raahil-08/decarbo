@@ -1,0 +1,5 @@
+industry,metric,value_low,value_mode,value_high,source_name,verified
+brass_components,kwh_per_t_output,1800,2100,2600,BEE Jamnagar Brass Cluster Energy Audit,false
+brass_components,kgco2e_per_t_output,5000,7200,9500,Jamnagar SME Industrial Baseline Report,false
+foundry,kwh_per_t_output,600,850,1200,BEE Foundry Cluster Energy Study,false
+foundry,kgco2e_per_t_output,1200,1800,2500,National Clean Foundry Study,false
