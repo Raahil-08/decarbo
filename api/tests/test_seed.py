@@ -12,6 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 def test_seed_idempotency_and_integrity(db_session):
     """Verify scripts/seed.py runs idempotently and populates all canonical tables."""
     import sys
+
     sys.path.insert(0, str(BASE_DIR / "scripts"))
     from seed import run_seed
 
@@ -71,7 +72,11 @@ def test_seed_idempotency_and_integrity(db_session):
     assert solar.circularity_points == 2
 
     # Verify Benchmarks
-    bm = db_session.query(Benchmark).filter_by(industry="brass_components", metric="kwh_per_t_output").first()
+    bm = (
+        db_session.query(Benchmark)
+        .filter_by(industry="brass_components", metric="kwh_per_t_output")
+        .first()
+    )
     assert bm is not None
     assert float(bm.value_mode) == 2100.0
 
@@ -141,12 +146,16 @@ def test_demo_factory_data_and_drift():
 
     # Electricity intensity (kWh / tonne output) drift in last 3 months (+14%)
     baseline_months = ["2025-09", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"]
-    avg_baseline_kwh_per_t = sum(monthly_kwh[m] / monthly_output[m] for m in baseline_months) / len(baseline_months)
+    avg_baseline_kwh_per_t = sum(monthly_kwh[m] / monthly_output[m] for m in baseline_months) / len(
+        baseline_months
+    )
     drift_months = ["2026-06", "2026-07", "2026-08"]
-    avg_drift_kwh_per_t = sum(monthly_kwh[m] / monthly_output[m] for m in drift_months) / len(drift_months)
+    avg_drift_kwh_per_t = sum(monthly_kwh[m] / monthly_output[m] for m in drift_months) / len(
+        drift_months
+    )
     drift_pct = (avg_drift_kwh_per_t - avg_baseline_kwh_per_t) / avg_baseline_kwh_per_t
 
-    assert drift_pct > 0.10, f"Expected drift > 10%, got {drift_pct*100:.1f}%"
+    assert drift_pct > 0.10, f"Expected drift > 10%, got {drift_pct * 100:.1f}%"
 
 
 def test_tally_and_bill_files():
@@ -157,7 +166,16 @@ def test_tally_and_bill_files():
     with open(tally_csv, encoding="utf-8") as f:
         reader = csv.reader(f)
         header = next(reader)
-        expected = ["Date", "Particulars", "Voucher Type", "Voucher No", "Quantity", "Unit", "Rate", "Gross Value"]
+        expected = [
+            "Date",
+            "Particulars",
+            "Voucher Type",
+            "Voucher No",
+            "Quantity",
+            "Unit",
+            "Rate",
+            "Gross Value",
+        ]
         assert header == expected
         rows = list(reader)
         assert len(rows) >= 12, "Tally register should have at least 12 rows"
@@ -172,4 +190,3 @@ def test_tally_and_bill_files():
         with open(pdf_path, "rb") as f:
             header = f.read(5)
             assert header.startswith(b"%PDF-"), f"{pdf_path.name} is not a valid PDF"
-

@@ -97,6 +97,12 @@ def get_factory(
     if not factory:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": {"code": "FACTORY_NOT_FOUND", "message_key": "errors.factory_not_found", "details": {}}},
+            detail={
+                "error": {
+                    "code": "FACTORY_NOT_FOUND",
+                    "message_key": "errors.factory_not_found",
+                    "details": {},
+                }
+            },
         )
     return factory

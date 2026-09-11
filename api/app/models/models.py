@@ -160,9 +160,7 @@ class EmissionFactor(Base):
     verified = Column(Boolean, nullable=False, default=False)
     notes = Column(String, nullable=True)
 
-    __table_args__ = (
-        UniqueConstraint("activity_type", "region", "source_version"),
-    )
+    __table_args__ = (UniqueConstraint("activity_type", "region", "source_version"),)
 
 
 class CalcRun(Base):
@@ -184,7 +182,9 @@ class EmissionResult(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     calc_run_id = Column(GUID(), ForeignKey("calc_runs.id", ondelete="CASCADE"), nullable=False)
-    activity_record_id = Column(GUID(), ForeignKey("activity_records.id", ondelete="CASCADE"), nullable=False)
+    activity_record_id = Column(
+        GUID(), ForeignKey("activity_records.id", ondelete="CASCADE"), nullable=False
+    )
     emission_factor_id = Column(GUID(), ForeignKey("emission_factors.id"), nullable=False)
     scope = Column(String, nullable=False)
     kgco2e = Column(Numeric, nullable=False)

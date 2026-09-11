@@ -21,7 +21,9 @@ ROLE_HIERARCHY = {
 
 
 class AuthenticatedUser:
-    def __init__(self, user_id: uuid.UUID, email: str | None = None, metadata: dict[str, Any] | None = None):
+    def __init__(
+        self, user_id: uuid.UUID, email: str | None = None, metadata: dict[str, Any] | None = None
+    ):
         self.id = user_id
         self.email = email
         self.metadata = metadata or {}
@@ -33,7 +35,13 @@ async def get_current_user(
     if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": {"code": "UNAUTHORIZED", "message_key": "errors.unauthorized", "details": {}}},
+            detail={
+                "error": {
+                    "code": "UNAUTHORIZED",
+                    "message_key": "errors.unauthorized",
+                    "details": {},
+                }
+            },
         )
 
     token = credentials.credentials
@@ -59,7 +67,13 @@ async def get_current_user(
         if not user_id_str:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={"error": {"code": "INVALID_TOKEN", "message_key": "errors.invalid_token", "details": {}}},
+                detail={
+                    "error": {
+                        "code": "INVALID_TOKEN",
+                        "message_key": "errors.invalid_token",
+                        "details": {},
+                    }
+                },
             )
         return AuthenticatedUser(
             user_id=uuid.UUID(user_id_str),
@@ -69,7 +83,13 @@ async def get_current_user(
     except jwt.PyJWTError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": {"code": "INVALID_TOKEN", "message_key": "errors.invalid_token", "details": {"msg": str(e)}}},
+            detail={
+                "error": {
+                    "code": "INVALID_TOKEN",
+                    "message_key": "errors.invalid_token",
+                    "details": {"msg": str(e)},
+                }
+            },
         )
 
 
@@ -88,7 +108,13 @@ def require_factory_access(min_role: str = "viewer"):
             # PRD §16.1: return 404 (not 403) when user is not a member
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail={"error": {"code": "FACTORY_NOT_FOUND", "message_key": "errors.factory_not_found", "details": {}}},
+                detail={
+                    "error": {
+                        "code": "FACTORY_NOT_FOUND",
+                        "message_key": "errors.factory_not_found",
+                        "details": {},
+                    }
+                },
             )
 
         user_role_level = ROLE_HIERARCHY.get(member.role, 0)
@@ -96,7 +122,9 @@ def require_factory_access(min_role: str = "viewer"):
         if user_role_level < required_role_level:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail={"error": {"code": "FORBIDDEN", "message_key": "errors.forbidden", "details": {}}},
+                detail={
+                    "error": {"code": "FORBIDDEN", "message_key": "errors.forbidden", "details": {}}
+                },
             )
         return member
 
