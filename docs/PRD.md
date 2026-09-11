@@ -161,7 +161,7 @@ P0 = required for the hackathon demo. P1 = build if time allows. P2 = later / st
 
 ```
                          ┌──────────────────────────────┐
-                         │  Next.js web app (browser)   │
+                         │  React.js web app (browser)  │
                          │  - Supabase Auth (login)     │
                          │  - Direct upload to Storage  │
                          │  - Calls FastAPI with JWT    │
@@ -213,7 +213,7 @@ Use the latest stable versions at build time unless a version is stated.
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Frontend framework | Next.js (App Router) + TypeScript | `web/` folder |
+| Frontend framework | React.js (Vite) + TypeScript | `web/` folder |
 | Styling | Tailwind CSS + shadcn/ui | Customise tokens per §17.4; do not ship default shadcn look |
 | Data fetching | TanStack Query | All API calls through a typed client in `web/lib/api.ts` |
 | Forms | react-hook-form + zod | |
@@ -1176,7 +1176,7 @@ class LLMProvider(Protocol):
 
 ---
 
-## 17. Frontend specification (Next.js)
+## 17. Frontend specification (React.js + Vite)
 
 ### 17.1 Routes (all under `/[locale]`, locales `en`, `gu`, `hi`)
 
@@ -1316,7 +1316,7 @@ Time estimates assume a 3–4 person team in a ~36-hour event. **Definition of d
 
 | Phase | Scope | Acceptance criteria | Est. |
 |---|---|---|---|
-| 0 Setup | Repo structure (§7), `.env.example`, Supabase project in Mumbai, migrations 0001–0003, FastAPI `/health`, Next.js with login, lint config | Sign in works; `/health` returns DB ok; an RLS test shows user B cannot read user A's factory | 1.5 h |
+| 0 Setup | Repo structure (§7), `.env.example`, Supabase project in Mumbai, migrations 0001–0003, FastAPI `/health`, React.js (Vite) with login, lint config | Sign in works; `/health` returns DB ok; an RLS test shows user B cannot read user A's factory | 1.5 h |
 | 1 Seed data | Seed CSVs (§9.3, §10.5, §12.6), `seed.py` (idempotent), `generate_demo_data.py`, `make_template.py` | Seeding twice gives identical counts; demo xlsx, sample bills and Tally CSV generated | 1 h |
 | 2 Engine | Units, factor lookup, calculator, calc runs, provenance, hotspots | Golden tests pass; demo factory total computed; every result has a formula string | 3 h |
 | 3 Ingestion | Template parser, validation, LLM mapper, bill extractor, review screens, activity table, coverage grid | Demo template → confirmed records; Tally fixture ≥ 90% items mapped correctly; sample bill → correct kWh and period; issues visible and fixable | 4 h |
