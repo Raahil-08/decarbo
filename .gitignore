@@ -13,6 +13,7 @@ venv/
 test.db
 .pytest_cache/
 .ruff_cache/
+api/data/uploads/
 
 # Node
 node_modules/

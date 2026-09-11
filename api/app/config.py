@@ -28,6 +28,23 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
+    @property
+    def llm_enabled(self) -> bool:
+        return self.LLM_ENABLED
+
+    @property
+    def anthropic_api_key(self) -> str:
+        return self.ANTHROPIC_API_KEY
+
+    @property
+    def llm_model_fast(self) -> str:
+        return self.LLM_MODEL_FAST
+
+    @property
+    def llm_model_smart(self) -> str:
+        return self.LLM_MODEL_SMART
+
+
 
 @lru_cache
 def get_settings() -> Settings:

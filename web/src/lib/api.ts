@@ -10,13 +10,17 @@ export async function apiClient<T>(
   const token = session?.access_token;
 
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
+
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
+
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
