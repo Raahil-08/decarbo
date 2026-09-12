@@ -431,6 +431,7 @@ export function PlanResults({
 
           <button
             type="button"
+            data-testid="download-report-btn"
             disabled={isDownloadingReport}
             onClick={handleDownloadReport}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-medium text-ink bg-white hover:bg-paper border border-rule transition-colors shadow-xs disabled:opacity-60"

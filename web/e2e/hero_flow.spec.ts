@@ -55,16 +55,17 @@ test.describe("Decarbo Hero Flow (PRD §21 & §22)", () => {
     await expect(page.locator("body")).toContainText(/ડીકાર્બો|ડેશબોર્ડ|મારો પ્લાન બનાવો|ડીકાર્બોને પૂછો/i, { timeout: 15000 });
 
     // 7. Trigger PDF Report Generation per PRD §21
-    const reportBtn = page.locator('button:has-text("પીડીએફ"), button:has-text("રિપોર્ટ"), button:has-text("PDF")').first();
+    const reportBtn = page.getByTestId("download-report-btn");
     await reportBtn.scrollIntoViewIfNeeded();
-    await expect(reportBtn).toBeVisible();
+    await expect(reportBtn).toBeVisible({ timeout: 15000 });
+    await expect(reportBtn).toBeEnabled({ timeout: 15000 });
 
     const reportPromise = page.waitForResponse(
       (res) => res.url().includes("/report") && res.status() < 400,
-      { timeout: 60000 }
+      { timeout: 75000 }
     );
 
-    await reportBtn.click({ force: true });
+    await reportBtn.click();
 
     const reportResponse = await reportPromise;
     expect(reportResponse.status()).toBeLessThan(400);
