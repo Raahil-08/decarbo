@@ -363,3 +363,20 @@ def test_plans_list_and_select(
     # 4. Non-member access check (User B cannot access User A's factory)
     b_res = client.get(f"/api/v1/factories/{factory_id}/plans", headers=auth_headers_user_b)
     assert b_res.status_code == 404
+
+    macc_res = client.get(f"/api/v1/factories/{factory_id}/macc", headers=auth_headers_user_a)
+    assert macc_res.status_code == 200
+    macc_data = macc_res.json()
+    assert len(macc_data) > 0
+
+    # Verify below-zero bars (money-saving fixes)
+    negative_cost_bars = [b for b in macc_data if b["cost_per_tonne_inr"] < 0]
+    assert len(negative_cost_bars) > 0, "MACC should have below-zero bars for fixes that pay for themselves"
+    assert any(b["code"] == "SOLAR_ROOFTOP" for b in negative_cost_bars)
+
+
+
+    # Verify User B gets 404
+    b_macc_res = client.get(f"/api/v1/factories/{factory_id}/macc", headers=auth_headers_user_b)
+    assert b_macc_res.status_code == 404
+

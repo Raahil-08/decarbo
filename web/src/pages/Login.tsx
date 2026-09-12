@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { Mail, CheckCircle2, AlertCircle } from "lucide-react";
+import { Mail, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
 
 export function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -162,9 +165,25 @@ export function Login() {
                 Google
               </button>
             </div>
+
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  const DEV_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTExMTExMS0xMTExLTExMTEtMTExMS0xMTExMTExMTExMTEiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZW1haWwiOiJvd25lckBqYW1uYWdhcmJyYXNzLmNvbSJ9.eS12sK2y2X-86M-64jH_9k_9p17YJ_Ovd90E3YfX6iY";
+                  localStorage.setItem("decarbo_dev_token", DEV_TOKEN);
+                  navigate("/dashboard");
+                }}
+                className="w-full flex justify-center items-center py-2.5 px-4 border border-leaf/30 rounded-md shadow-sm text-sm font-semibold text-leaf bg-leaf/10 hover:bg-leaf/20 focus:outline-none transition-colors"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Demo Factory Owner (Instant Sign In)
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+

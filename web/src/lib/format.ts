@@ -70,3 +70,30 @@ export function formatEmissionsT(kgco2e: number): string {
   const t = kgco2e / 1000;
   return `${t.toFixed(1)} tCO2e`;
 }
+
+export function parseIndianCurrency(input: string): number {
+  if (!input) return 0;
+  const clean = input.trim().replace(/₹/g, "").replace(/,/g, "").trim().toLowerCase();
+
+  // Match suffixes like "l", "lakh", "lakhs", "lac", "lacs"
+  const lakhMatch = clean.match(/^([\d.]+)\s*(l|lakh|lakhs|lac|lacs)$/);
+  if (lakhMatch) {
+    return parseFloat(lakhMatch[1]) * 100000;
+  }
+
+  // Match suffixes like "cr", "crore", "crores"
+  const croreMatch = clean.match(/^([\d.]+)\s*(cr|crore|crores)$/);
+  if (croreMatch) {
+    return parseFloat(croreMatch[1]) * 10000000;
+  }
+
+  // Match suffixes like "k", "thousand"
+  const kMatch = clean.match(/^([\d.]+)\s*(k|thousand)$/);
+  if (kMatch) {
+    return parseFloat(kMatch[1]) * 1000;
+  }
+
+  const parsed = parseFloat(clean);
+  return isNaN(parsed) ? 0 : parsed;
+}
+

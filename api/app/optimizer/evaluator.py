@@ -486,8 +486,9 @@ def _apply_single_intervention(
 
     elif eff == "shift_to_secondary":
         delta = float(params.get("delta", 0.0)) if level is None else 0.0
-        _, old_sec, new_sec = apply_shift_to_secondary(
-            state.brass_input_kg, state.secondary_brass_share, level=level, delta=delta
+        old_sec = state.secondary_brass_share
+        new_sec, _ = apply_shift_to_secondary(
+            current_share=old_sec, target_level=level, delta=delta
         )
         state.secondary_brass_share = new_sec
         shifted_kg = (new_sec - old_sec) * state.brass_input_kg
@@ -499,7 +500,7 @@ def _apply_single_intervention(
     elif eff == "onsite_generation":
         kwp = float(level) if level is not None else 50.0
         yield_k = float(params.get("yield_kwh_per_kwp", 1500.0))
-        new_grid, solar_gen, offset_kwh = apply_onsite_generation(
+        new_grid, offset_kwh, solar_gen = apply_onsite_generation(
             state.grid_kwh, kwp, yield_k
         )
         state.grid_kwh = new_grid

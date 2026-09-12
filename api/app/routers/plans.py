@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.auth import AuthenticatedUser, require_factory_access
 from app.db import get_db
 from app.engine.emissions import calculate_emissions_summary
+from app.interventions.effects import apply_interventions_in_order
 from app.interventions.matcher import (
     extract_baseline_pools,
     is_applicable,
@@ -25,7 +26,7 @@ from app.models.models import (
     Plan,
     PlanItem,
 )
-from app.optimizer.combinations import generate_pool_combinations
+from app.optimizer.combinations import _calc_pool_state_emissions, generate_pool_combinations
 from app.optimizer.evaluator import re_evaluate_with_tightening
 from app.optimizer.macc import generate_macc_curve
 from app.optimizer.solver import OptimizerSolver
@@ -579,3 +580,170 @@ def select_plan(
     db.commit()
 
     return {"status": "success", "selected_plan_id": str(plan.id)}
+
+
+# ---------------------------------------------------------------------------
+# Applicable Interventions (What-if levers)
+# ---------------------------------------------------------------------------
+
+@router.get(
+    "/{factory_id}/interventions/applicable",
+    status_code=status.HTTP_200_OK,
+)
+def get_applicable_interventions(
+    factory_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_factory_access(min_role="viewer")),
+) -> list[dict[str, Any]]:
+    """Return applicable interventions with effect metadata for What-if UI levers."""
+    factory = db.query(Factory).filter(Factory.id == factory_id).first()
+    if not factory:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": {"code": "FACTORY_NOT_FOUND", "message_key": "errors.factory_not_found"}},
+        )
+
+    records = (
+        db.query(ActivityRecord)
+        .filter(ActivityRecord.factory_id == factory_id)
+        .all()
+    )
+    factors = db.query(EmissionFactor).all()
+    factors_map = {f.activity_type: float(f.kgco2e_per_unit) for f in factors}
+    baseline_state, pool_costs = extract_baseline_pools(records)
+
+    calc_run = (
+        db.query(CalcRun)
+        .filter(CalcRun.factory_id == factory_id)
+        .order_by(CalcRun.created_at.desc())
+        .first()
+    )
+    baseline_summary = calc_run.summary if calc_run else {"total_kgco2e": 100000.0}
+    active_activities = {r.activity_type for r in records}
+
+    all_interventions = db.query(Intervention).all()
+    applicable_itvs = [
+        itv
+        for itv in all_interventions
+        if is_applicable(itv, baseline_state, baseline_summary, factory, active_activities)
+    ]
+
+    baseline_total = _calc_pool_state_emissions(baseline_state, factors_map)
+
+    result = []
+    for itv in applicable_itvs:
+        effect_params = itv.effect_params
+        if isinstance(effect_params, str):
+            try:
+                effect_params = json.loads(effect_params)
+            except Exception:
+                effect_params = {}
+
+        # Calculate standalone reduction
+        itv_dict = {
+            "code": itv.code,
+            "effect_type": itv.effect_type,
+            "pool": itv.pool,
+            "effect_params": dict(effect_params) if effect_params else {},
+        }
+        after_st, _ = apply_interventions_in_order(baseline_state, [itv_dict])
+        standalone_reduction = max(0.0, baseline_total - _calc_pool_state_emissions(after_st, factors_map))
+
+        capex_levels = getattr(itv, "capex_inr_levels", None)
+        if isinstance(capex_levels, str):
+            try:
+                capex_levels = json.loads(capex_levels)
+            except Exception:
+                capex_levels = None
+
+        result.append({
+            "code": itv.code,
+            "title_en": itv.title_en,
+            "category": itv.category,
+            "pool": itv.pool,
+            "effect_type": itv.effect_type,
+            "difficulty": int(getattr(itv, "difficulty", 1) or 1),
+            "capex_inr": float(getattr(itv, "capex_inr", 0) or 0),
+            "capex_inr_levels": capex_levels,
+            "effect_params": effect_params,
+            "standalone_reduction_kgco2e": round(standalone_reduction, 2),
+            "standalone_reduction_tco2e": round(standalone_reduction / 1000, 3),
+            "circularity_points": int(getattr(itv, "circularity_points", 0) or 0),
+        })
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Marginal Abatement Cost Curve (MACC) Endpoint
+# ---------------------------------------------------------------------------
+
+@router.get(
+    "/{factory_id}/macc",
+    response_model=list[MaccItemResponse],
+    status_code=status.HTTP_200_OK,
+)
+def get_macc(
+    factory_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_factory_access(min_role="viewer")),
+) -> list[MaccItemResponse]:
+    """Return Marginal Abatement Cost Curve (MACC) bars for the factory."""
+    factory = db.query(Factory).filter(Factory.id == factory_id).first()
+    if not factory:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": {"code": "FACTORY_NOT_FOUND", "message_key": "errors.factory_not_found"}},
+        )
+
+    records = (
+        db.query(ActivityRecord)
+        .filter(ActivityRecord.factory_id == factory_id)
+        .all()
+    )
+    factors = db.query(EmissionFactor).all()
+    factors_map = {f.activity_type: float(f.kgco2e_per_unit) for f in factors}
+    baseline_state, pool_costs = extract_baseline_pools(records)
+    tariff_inr = float(factory.electricity_tariff_inr_per_kwh or 7.8)
+
+    calc_run = (
+        db.query(CalcRun)
+        .filter(CalcRun.factory_id == factory_id)
+        .order_by(CalcRun.created_at.desc())
+        .first()
+    )
+    baseline_summary = calc_run.summary if calc_run else {"total_kgco2e": 100000.0}
+    active_activities = {r.activity_type for r in records}
+
+    all_interventions = db.query(Intervention).all()
+    applicable_itvs = [
+        itv
+        for itv in all_interventions
+        if is_applicable(itv, baseline_state, baseline_summary, factory, active_activities)
+    ]
+
+    # Find currently selected plan codes, if any
+    selected_plan = (
+        db.query(Plan)
+        .filter(Plan.factory_id == factory_id, Plan.is_selected.is_(True))
+        .first()
+    )
+    selected_codes = set()
+    if selected_plan:
+        selected_items = (
+            db.query(PlanItem)
+            .filter(PlanItem.plan_id == selected_plan.id)
+            .all()
+        )
+        selected_codes = {item.intervention_code for item in selected_items}
+
+    macc_bars = generate_macc_curve(
+        applicable_interventions=applicable_itvs,
+        baseline_state=baseline_state,
+        tariff_inr=tariff_inr,
+        emission_factors_map=factors_map,
+        pool_costs=pool_costs,
+        selected_plan_codes=selected_codes,
+    )
+
+    return [MaccItemResponse(**b) for b in macc_bars]

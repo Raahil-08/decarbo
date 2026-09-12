@@ -114,11 +114,12 @@ def seed_demo_data_for_factory(
     member: FactoryMember = Depends(require_factory_access(min_role="member")),
     db: Session = Depends(get_db),
 ):
+    from datetime import date
     from pathlib import Path
 
     from app.engine.emissions import calculate_emissions_summary
     from app.engine.hotspots import compute_circularity_score, detect_drift, find_leak_points
-    from app.ingestion.template_parser import parse_template_xlsx
+    from app.ingestion.template_parser import parse_template_file
     from app.models.models import (
         ActivityRecord,
         ActivityType,
@@ -133,19 +134,23 @@ def seed_demo_data_for_factory(
     if not factory:
         raise HTTPException(status_code=404, detail={"error": {"code": "NOT_FOUND"}})
 
-    demo_path = Path(__file__).resolve().parent.parent.parent / "data" / "demo" / "demo_factory.xlsx"
+    demo_path = Path(__file__).resolve().parent.parent.parent.parent / "data" / "demo" / "demo_factory.xlsx"
+    if not demo_path.exists():
+        demo_path = Path(__file__).resolve().parent.parent.parent / "data" / "demo" / "demo_factory.xlsx"
+    if not demo_path.exists():
+        demo_path = Path.cwd() / "data" / "demo" / "demo_factory.xlsx"
     if not demo_path.exists():
         raise HTTPException(status_code=404, detail={"error": {"code": "DEMO_FILE_NOT_FOUND"}})
 
     with open(demo_path, "rb") as f:
         file_bytes = f.read()
 
-    canonical_activities = [
-        {"key": at.key, "canonical_unit": at.canonical_unit}
-        for at in db.query(ActivityType).all()
-    ]
-
-    parse_result = parse_template_xlsx(file_bytes, canonical_activities)
+    activity_types = db.query(ActivityType).all()
+    draft_records, _ = parse_template_file(
+        file_bytes=file_bytes,
+        filename="demo_factory.xlsx",
+        activity_types=activity_types,
+    )
 
     # Clean existing records for this factory
     db.query(EmissionResult).filter(
@@ -157,10 +162,19 @@ def seed_demo_data_for_factory(
     db.query(ActivityRecord).filter(ActivityRecord.factory_id == factory_id).delete(synchronize_session=False)
 
     new_records = []
-    for r in parse_result.draft_records:
+    for r in draft_records:
+        pm_val = r["period_month"]
+        if isinstance(pm_val, str):
+            try:
+                pm_date = date.fromisoformat(pm_val) if len(pm_val) == 10 else date.fromisoformat(f"{pm_val}-01")
+            except Exception:
+                pm_date = date.today()
+        else:
+            pm_date = pm_val
+
         rec = ActivityRecord(
             factory_id=factory_id,
-            period_month=r["period_month"],
+            period_month=pm_date,
             activity_type=r["activity_type"],
             quantity=r["quantity"],
             unit=r["unit"],
@@ -207,9 +221,16 @@ def seed_demo_data_for_factory(
     summary["circularity"] = circularity
 
     months = [r.period_month for r in new_records if r.period_month]
-    from datetime import date
-    p_start = min(months) if months else date.today()
-    p_end = max(months) if months else date.today()
+    if months:
+        try:
+            p_start = date.fromisoformat(f"{min(months)}-01")
+            p_end = date.fromisoformat(f"{max(months)}-01")
+        except Exception:
+            p_start = date.today()
+            p_end = date.today()
+    else:
+        p_start = date.today()
+        p_end = date.today()
 
     calc_run = CalcRun(
         factory_id=factory_id,

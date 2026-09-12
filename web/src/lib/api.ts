@@ -6,8 +6,14 @@ export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const session = (await supabase.auth.getSession()).data.session;
-  const token = session?.access_token;
+  const devToken = localStorage.getItem("decarbo_dev_token");
+  let token: string | null | undefined = devToken;
+  if (!token) {
+    const session = (await supabase.auth.getSession()).data.session;
+    token = session?.access_token;
+  }
+
+
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),

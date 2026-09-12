@@ -32,7 +32,10 @@ def parse_pg_array(val: str) -> list:
     return [x.strip() for x in val.split(",") if x.strip()]
 
 
-def parse_json(val: str, default=None):
+from typing import Any, Optional
+
+
+def parse_json(val: Any, default=None):
     if not val:
         return default or {}
     try:
@@ -41,13 +44,13 @@ def parse_json(val: str, default=None):
         return default or {}
 
 
-def parse_bool(val: str) -> bool:
+def parse_bool(val: Any) -> bool:
     if isinstance(val, bool):
         return val
     return str(val).strip().lower() in ("true", "1", "yes", "t")
 
 
-def parse_float(val: str):
+def parse_float(val: Any) -> Optional[float]:
     if val is None or str(val).strip() == "":
         return None
     try:
@@ -56,7 +59,7 @@ def parse_float(val: str):
         return None
 
 
-def parse_int(val: str):
+def parse_int(val: Any) -> Optional[int]:
     if val is None or str(val).strip() == "":
         return None
     try:
@@ -65,7 +68,7 @@ def parse_int(val: str):
         return None
 
 
-def parse_date(val: str):
+def parse_date(val: Any):
     if val is None or str(val).strip() == "":
         return None
     from datetime import date

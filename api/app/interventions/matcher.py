@@ -306,12 +306,12 @@ def evaluate_standalone_impact(
                 chosen_lvl = None
 
         delta = float(params.get("delta", 0.0)) if chosen_lvl is None else 0.0
-        _, old_sec, new_sec = apply_shift_to_secondary(
-            pool_state.brass_input_kg,
+        new_sec, delta_inc = apply_shift_to_secondary(
             pool_state.secondary_brass_share,
-            level=chosen_lvl,
+            target_level=chosen_lvl,
             delta=delta,
         )
+        old_sec = pool_state.secondary_brass_share
         shifted_kg = (new_sec - old_sec) * pool_state.brass_input_kg
         # Primary factor - secondary factor delta
         prim_f = emission_factors_map.get("brass_input_primary", 4.2)

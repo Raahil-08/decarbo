@@ -14,6 +14,8 @@ test.db
 .pytest_cache/
 .ruff_cache/
 api/data/uploads/
+/app
+.python-version
 
 # Node
 node_modules/
