@@ -293,7 +293,7 @@ export function PlanForm({
         </div>
 
         {/* Action Button */}
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex items-center justify-end gap-3 pt-2 pb-8">
           {parsedBudget <= 0 && (
             <span className="text-xs text-ember flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5" />

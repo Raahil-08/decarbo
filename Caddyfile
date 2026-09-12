@@ -1,4 +1,10 @@
 :80 {
+    encode gzip zstd
+
+    handle /health {
+        reverse_proxy api:8000
+    }
+
     handle /api/* {
         reverse_proxy api:8000
     }

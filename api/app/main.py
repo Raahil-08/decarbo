@@ -67,6 +67,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
+# Mount health at root for Docker/orchestrator health checks
+app.include_router(health.router)
+
 # Mount routers under /api/v1
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(factories.router, prefix="/api/v1")

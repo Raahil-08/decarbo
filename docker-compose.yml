@@ -1,4 +1,18 @@
 services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+      - web
+
   api:
     build:
       context: ./api
@@ -9,6 +23,7 @@ services:
       - .env
     environment:
       - PORT=8000
+    restart: unless-stopped
 
   web:
     build:
@@ -17,4 +32,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_URL=http://localhost:8000/api/v1
+      - VITE_API_URL=/api/v1
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

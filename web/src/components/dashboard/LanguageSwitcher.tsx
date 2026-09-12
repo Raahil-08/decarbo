@@ -10,6 +10,7 @@ export function LanguageSwitcher() {
       {LOCALES.map((l) => (
         <button
           key={l.code}
+          data-testid={`lang-btn-${l.code}`}
           onClick={() => setLocale(l.code as Locale)}
           className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all ${
             locale === l.code

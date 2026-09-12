@@ -1,0 +1,43 @@
+FROM python:3.12-slim-bookworm
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=8000
+
+# Install system packages for WeasyPrint rendering (Pango, HarfBuzz, Fontconfig) and Indian font fallbacks
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libharfbuzz0b \
+    libfontconfig1 \
+    fonts-deva \
+    fonts-gujr \
+    fonts-freefont-ttf \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv from official binary image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+WORKDIR /app
+
+# Copy dependency definitions
+COPY pyproject.toml uv.lock ./
+
+# Install python dependencies in isolated system/virtual env
+RUN uv sync --frozen --no-dev
+
+# Copy application source and seed/template assets
+COPY app ./app
+COPY data ./data
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Start uvicorn with 2 workers per PRD §23.2
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

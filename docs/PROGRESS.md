@@ -13,7 +13,7 @@
 | 8 AI explanation | done | Provider abstraction (`LLMProvider`, `AnthropicProvider`, `MockProvider`) with `LLM_ENABLED=false` offline mode. Strict numeric grounding guardrail normalizing Gujarati (`૦-૯`) & Devanagari (`०-९`) digits, validating all extracted figures against engine-allowed numbers. Multilingual 4-part plan explanation (en, gu, hi) with Jinja2 deterministic template fallback. SSE streaming (`GET /plans/{id}/explanation`), user rate-limiting (30/hr), and DB caching in `plans.explanation`. PlanExplanationCard with language toggle, live SSE stream, provenance badges (Verified Grounded / Deterministic Template / Cached), and manual regenerate. 49 pytest tests passing, 0 ruff errors, 0 TS errors. |
 | 9 PDF report | done | Jinja2 + WeasyPrint 7-page print-ready A4 PDF report with running headers/footers, signature Plan Ledger, double-ruled closing lines, and statutory disclaimer. Multilingual self-hosted fonts with HarfBuzz shaping: IBM Plex Sans (tabular numerals), Hind Vadodara (Gujarati conjuncts: ક્ષ, દ્ર, શ્ર), and Hind (Devanagari). Matplotlib Agg vector SVG charts for Scope 1/2/3 breakdown and MACC step chart. Complete factor provenance & methodology register with source (CEA FY24-25, IPCC 2006, etc.), version, year, and estimate badges. Tenant isolation with 404 protection and token query param decoding for browser downloads. PlanResults UI integration with language choice, loading feedback, and automatic file download. 8/8 new report tests passing; 57/57 total backend tests passing, 0 ruff errors, clean TS build. |
 | 10 P1 extras | done | All 7 P1 extras built & browser-verified in strict PRD §22 order: (1) Vectorized triangular Monte Carlo uncertainty sampling (N=1,000, seed=42) in Python engine evaluating compound effects under 2ms, computing P10, P50, P90 ranges and % chance of target achievement; (2) 4-priority optimizer weights (Carbon, Savings, Capex, Circularity) with i18n support; (3) Energy-intensity drift alert with DriftDiagnosisModal featuring 12-month intensity trend, baseline comparisons, and MAD robust z-score anomaly detection (|z| > 3.5); (4) Budget Frontier optimizer curve ("What More Budget Buys") evaluating 10 budget levels (0% to 150%) with target line, user budget marker, and table view toggle; (5) 4-pillar Circularity Score (Material 35%, Waste 20%, Solar 25%, Intensity 20%) with radial gauge, progress bars, opportunity highlighter, and table view toggle; (6) Tracking & Adoption view (`/factories/{id}/tracking`) with production-indexed intensity progress, >20% production drift alert, inline status selector (`planned`, `in_progress`, `done`, `dropped`), actual capex tracking, and monthly trend line chart; (7) "Ask Decarbo" streaming SSE chat (`/factories/{id}/chat`) with engine tool execution (`get_hotspots`, `get_inventory_summary`, `get_applicable_interventions`, `run_plan`, `simulate`, `explain_number`), strict numeric grounding guardrail, and offline regex intent responder when `LLM_ENABLED=false`. 66/66 tests passing, 0 ruff errors, 0 TS build errors. |
-| 11 Deploy & rehearse | not started | |
+| 11 Deploy & rehearse | done | Production Docker containerisation: FastAPI backend with Pango, HarfBuzz, font libraries, and uvicorn workers (api/Dockerfile); multi-stage Vite React SPA on Nginx (web/Dockerfile); Caddy reverse proxy with compression (Caddyfile & docker-compose.yml). Frontend Vitest suite for PRD §21 Indian currency formatting rules (formatINR, formatLakh, formatCrore, parseIndianCurrency, 6/6 passing in 114ms). Playwright automated E2E hero flow test (e2e/hero_flow.spec.ts) covering the full hero journey: instant login → demo factory context → dashboard verification (tCO2e, Pareto leak-points) → build plan (₹10 L, 20%) → 3 plans & Plan Ledger verification → Gujarati language switch via useSyncExternalStore → PDF report compilation & download (passing in 18.8s). Production README.md with architecture, quickstart, 66 backend tests, 90-second demo rehearsal timeline, and pitch moat. |
 
 ## Known issues
 None.
@@ -32,7 +32,14 @@ uv run uvicorn app.main:app --reload
 ```bash
 cd web
 pnpm lint
+pnpm test
 pnpm build
+pnpm test:e2e
 pnpm dev
+```
+
+### Full Production Stack (Docker Compose)
+```bash
+docker compose up --build -d
 ```
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 
 export type Locale = "en" | "gu" | "hi";
 
@@ -635,12 +635,21 @@ const translations: Record<Locale, Record<string, string>> = {
   },
 };
 
-let currentLocale: Locale = "en";
+let currentLocale: Locale = (() => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("decarbo_locale") as Locale;
+    if (saved && translations[saved]) return saved;
+  }
+  return "en";
+})();
+
 const listeners = new Set<() => void>();
 
 export function setLocale(locale: Locale) {
   currentLocale = locale;
-  localStorage.setItem("decarbo_locale", locale);
+  if (typeof window !== "undefined") {
+    localStorage.setItem("decarbo_locale", locale);
+  }
   listeners.forEach((listener) => listener());
 }
 
@@ -648,20 +657,15 @@ export function getLocale(): Locale {
   return currentLocale;
 }
 
-export function useI18n() {
-  const [locale, setLocalLocale] = useState<Locale>(() => {
-    const saved = localStorage.getItem("decarbo_locale") as Locale;
-    return saved && translations[saved] ? saved : "en";
-  });
+function subscribe(callback: () => void) {
+  listeners.add(callback);
+  return () => {
+    listeners.delete(callback);
+  };
+}
 
-  useEffect(() => {
-    currentLocale = locale;
-    const handleChange = () => setLocalLocale(currentLocale);
-    listeners.add(handleChange);
-    return () => {
-      listeners.delete(handleChange);
-    };
-  }, [locale]);
+export function useI18n() {
+  const locale = useSyncExternalStore<Locale>(subscribe, getLocale, () => "en");
 
   const t = (key: string, params?: Record<string, string | number>): string => {
     let str = translations[locale]?.[key] || translations["en"]?.[key] || key;
