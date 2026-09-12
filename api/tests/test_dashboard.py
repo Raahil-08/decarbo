@@ -160,3 +160,13 @@ def test_dashboard_with_activity_records(client: TestClient, db_session: Session
         assert "×" in p["formula"]
         assert p["factor_source"]
         assert p["factor_year"] > 2000
+
+    # Test Drift Endpoint (PRD §11.2 & §16)
+    drift_res = client.get(f"/api/v1/factories/{factory_id}/drift", headers=auth_headers_user_a)
+    assert drift_res.status_code == 200
+    drift_data = drift_res.json()
+    assert "has_drift" in drift_data
+    assert "drift_pct" in drift_data
+    assert "message" in drift_data
+    assert "anomalies" in drift_data
+    assert drift_data["factory_id"] == str(factory_id)

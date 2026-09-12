@@ -167,9 +167,9 @@ class OptimizerSolver:
 
         else:  # "best_value"
             w = weights or {"co2": 0.5, "savings": 0.3, "low_capex": 0.1, "circularity": 0.1}
-            w_co2 = float(w.get("co2", 0.5))
+            w_co2 = float(w.get("co2") if w.get("co2") is not None else w.get("carbon", 0.5))
             w_sav = float(w.get("savings", 0.3))
-            w_capex = float(w.get("low_capex", 0.1))
+            w_capex = float(w.get("low_capex") if w.get("low_capex") is not None else w.get("capex", 0.1))
             w_circ = float(w.get("circularity", 0.1))
 
             max_red = max(

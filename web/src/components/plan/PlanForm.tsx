@@ -41,6 +41,7 @@ export function PlanForm({
   const [weightCapex, setWeightCapex] = useState<number>(1.0);
   const [weightSavings, setWeightSavings] = useState<number>(1.0);
   const [weightCarbon, setWeightCarbon] = useState<number>(1.0);
+  const [weightCircularity, setWeightCircularity] = useState<number>(1.0);
 
   const parsedBudget = parseIndianCurrency(budgetString);
 
@@ -55,9 +56,10 @@ export function PlanForm({
       max_payback_months: maxPayback ? parseFloat(maxPayback) : undefined,
       max_difficulty: maxDifficulty ? parseInt(maxDifficulty, 10) : undefined,
       weights: {
-        capex: weightCapex,
+        co2: weightCarbon,
         savings: weightSavings,
-        carbon: weightCarbon,
+        low_capex: weightCapex,
+        circularity: weightCircularity,
       },
     };
     onSubmit(params);
@@ -270,6 +272,18 @@ export function PlanForm({
                       value={weightCapex}
                       onChange={(e) => setWeightCapex(parseFloat(e.target.value))}
                       className="w-24 accent-brass"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-muted">{t("plan_priority_circularity")}</span>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2.0"
+                      step="0.25"
+                      value={weightCircularity}
+                      onChange={(e) => setWeightCircularity(parseFloat(e.target.value))}
+                      className="w-24 accent-leaf"
                     />
                   </div>
                 </div>

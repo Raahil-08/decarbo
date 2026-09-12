@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Calendar,
   Sliders,
+  ShieldCheck,
 } from "lucide-react";
 import { apiClient } from "../lib/api";
 import { useI18n } from "../lib/i18n";
@@ -28,6 +29,10 @@ import { CoverageGrid } from "../components/ingestion/CoverageGrid";
 import { ActivityRecordsTable } from "../components/ingestion/ActivityRecordsTable";
 import { PlanPage } from "./PlanPage";
 import { WhatIfPage } from "./WhatIfPage";
+import { CircularityCard } from "../components/dashboard/CircularityCard";
+import { DriftDiagnosisModal } from "../components/dashboard/DriftDiagnosisModal";
+import { TrackingView } from "../components/tracking/TrackingView";
+import { AskDecarboDrawer } from "../components/chat/AskDecarboDrawer";
 
 
 interface Factory {
@@ -95,13 +100,14 @@ interface DashboardData {
     recommendation: string;
   }>;
   provenance_items: any[];
+  circularity?: any;
 }
 
 export function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [factories, setFactories] = useState<Factory[]>([]);
   const [selectedFactoryId, setSelectedFactoryId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "plan" | "simulate" | "coverage" | "records">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "plan" | "simulate" | "tracking" | "coverage" | "records">("overview");
   const [loading, setLoading] = useState(true);
 
 
@@ -117,6 +123,12 @@ export function Dashboard() {
   // Provenance Drawer state
   const [isProvenanceOpen, setIsProvenanceOpen] = useState(false);
   const [provenanceFilter, setProvenanceFilter] = useState<string | null>(null);
+
+  // Drift Diagnosis Modal state
+  const [isDriftModalOpen, setIsDriftModalOpen] = useState(false);
+
+  // Ask Decarbo Chat Drawer state
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Create Factory Modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -499,6 +511,18 @@ export function Dashboard() {
                 <span>{t("what_if_nav_link")}</span>
               </button>
 
+              <button
+                onClick={() => setActiveTab("tracking")}
+                className={`pb-3 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-colors ${
+                  activeTab === "tracking"
+                    ? "border-ink text-ink"
+                    : "border-transparent text-muted hover:text-ink"
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-leaf" />
+                <span>{t("tracking_nav_link")}</span>
+              </button>
+
 
               <button
                 onClick={() => setActiveTab("coverage")}
@@ -559,8 +583,7 @@ export function Dashboard() {
                     <DriftBanner
                       alerts={dashboardData.drift_alerts}
                       onInspectAction={() => {
-                        setProvenanceFilter("grid_electricity");
-                        setIsProvenanceOpen(true);
+                        setIsDriftModalOpen(true);
                       }}
                     />
 
@@ -587,6 +610,9 @@ export function Dashboard() {
                         />
                       </div>
                     </div>
+
+                    {/* 4. Circularity Score Card (PRD §11.3) */}
+                    <CircularityCard data={dashboardData.circularity} />
                   </div>
                 )}
               </>
@@ -607,6 +633,11 @@ export function Dashboard() {
                 onBackToDashboard={() => setActiveTab("overview")}
                 onOpenPlanner={() => setActiveTab("plan")}
               />
+            )}
+
+            {/* Tab: Implementation Tracking (PRD §14.3) */}
+            {activeTab === "tracking" && selectedFactoryId && (
+              <TrackingView factoryId={selectedFactoryId} />
             )}
 
 
@@ -739,6 +770,35 @@ export function Dashboard() {
               </form>
             </div>
           </div>
+        )}
+
+        {/* Drift Diagnosis Modal (PRD §11.2) */}
+        <DriftDiagnosisModal
+          isOpen={isDriftModalOpen}
+          onClose={() => setIsDriftModalOpen(false)}
+          factoryId={selectedFactoryId || undefined}
+          onGoToPlanner={() => setActiveTab("plan")}
+        />
+
+        {/* Floating Ask Decarbo Button (PRD §15) */}
+        {selectedFactoryId && (
+          <>
+            <button
+              onClick={() => setIsChatOpen(true)}
+              className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg bg-ink text-white hover:bg-ink-light border border-rule transition-all hover:scale-105 active:scale-95"
+              title="Ask Decarbo Assistant"
+            >
+              <Sparkles className="w-4 h-4 text-leaf animate-pulse" />
+              <span className="text-xs font-bold tracking-wide">{t("ask_decarbo")}</span>
+            </button>
+
+            <AskDecarboDrawer
+              isOpen={isChatOpen}
+              onClose={() => setIsChatOpen(false)}
+              factoryId={selectedFactoryId}
+              factoryName={selectedFactory?.name}
+            />
+          </>
         )}
       </main>
     </div>

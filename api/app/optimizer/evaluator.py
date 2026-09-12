@@ -285,6 +285,28 @@ def re_evaluate_with_tightening(
     if best_totals.get("capex_inr", 0.0) > budget_inr + 1.0 and mode != "min_capex_for_target":
         is_feasible = False
 
+    from app.optimizer.monte_carlo import run_monte_carlo
+
+    eval_items: list[tuple[Intervention, Any]] = []
+    if "ordered" in locals():
+        eval_items = ordered
+    elif "raw_items" in locals():
+        eval_items = order_ledger_items(
+            raw_items, baseline_state, tariff_inr, emission_factors_map, pool_costs
+        )
+
+    uncertainty = run_monte_carlo(
+        chosen_items=eval_items,
+        baseline_state=baseline_state,
+        tariff_inr=tariff_inr,
+        emission_factors_map=emission_factors_map,
+        pool_costs=pool_costs,
+        baseline_total_kg=baseline_total_kg,
+        target_reduction_pct=target_reduction_pct,
+        n_samples=1000,
+        seed=42,
+    )
+
     return {
         "mode": mode,
         "feasible": is_feasible,
@@ -292,6 +314,7 @@ def re_evaluate_with_tightening(
         "min_budget_needed": min_budget,
         "totals": best_totals,
         "ledger": best_ledger,
+        "uncertainty": uncertainty,
     }
 
 

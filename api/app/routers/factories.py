@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict
@@ -6,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import AuthenticatedUser, get_current_user, require_factory_access
 from app.db import get_db
-from app.models.models import Factory, FactoryMember
+from app.models.models import ActivityRecord, CalcRun, EmissionResult, Factory, FactoryMember
 
 router = APIRouter(prefix="/factories", tags=["factories"])
 
@@ -126,7 +127,6 @@ def seed_demo_data_for_factory(
         Benchmark,
         CalcRun,
         EmissionFactor,
-        EmissionResult,
         Intervention,
     )
 
@@ -258,3 +258,75 @@ def seed_demo_data_for_factory(
 
     db.commit()
     return {"status": "ok", "records_seeded": len(new_records)}
+
+
+@router.get(
+    "/{factory_id}/drift",
+    response_model=dict[str, Any],
+    status_code=status.HTTP_200_OK,
+)
+def get_factory_drift(
+    factory_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_factory_access(min_role="viewer")),
+) -> dict[str, Any]:
+    """Retrieve intensity series, drift metrics, and anomaly flags per PRD §11.2 & §16."""
+    factory = db.query(Factory).filter(Factory.id == factory_id).first()
+    if not factory:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": {"code": "FACTORY_NOT_FOUND", "message_key": "errors.factory_not_found"}},
+        )
+
+    # 1. Look in latest calc_run summary
+    latest_run = (
+        db.query(CalcRun)
+        .filter(CalcRun.factory_id == factory_id)
+        .order_by(CalcRun.created_at.desc())
+        .first()
+    )
+
+    if latest_run and isinstance(latest_run.summary, dict) and "drift" in latest_run.summary:
+        drift_data = latest_run.summary["drift"]
+        if "series" in drift_data and len(drift_data.get("series", [])) > 0:
+            return {
+                "factory_id": str(factory_id),
+                **drift_data,
+            }
+
+        monthly_recs = latest_run.summary.get("monthly", [])
+        if monthly_recs:
+            from app.engine.hotspots import detect_drift
+            recomputed = detect_drift(monthly_recs)
+            return {
+                "factory_id": str(factory_id),
+                **recomputed,
+            }
+
+    # 2. Fallback: Aggregate from confirmed activity records directly
+    from app.engine.hotspots import detect_drift
+    records = (
+        db.query(ActivityRecord)
+        .filter(ActivityRecord.factory_id == factory_id, ActivityRecord.confirmed.is_(True))
+        .all()
+    )
+
+    monthly_dict: dict[str, dict[str, Any]] = {}
+    for r in records:
+        m = r.period_month
+        if not m:
+            continue
+        if m not in monthly_dict:
+            monthly_dict[m] = {"month": m, "kwh": 0.0, "output": 0.0}
+        if r.activity_type_code == "grid_electricity":
+            monthly_dict[m]["kwh"] += float(r.quantity or 0.0)
+        elif r.activity_type_code == "production_output":
+            monthly_dict[m]["output"] += float(r.quantity or 0.0)
+
+    sorted_monthly = [monthly_dict[k] for k in sorted(monthly_dict.keys())]
+    drift_result = detect_drift(sorted_monthly)
+    return {
+        "factory_id": str(factory_id),
+        **drift_result,
+    }
+

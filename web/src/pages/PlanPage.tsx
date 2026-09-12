@@ -8,6 +8,7 @@ import type { PlanFormParams } from "../components/plan/PlanForm";
 import { PlanResults } from "../components/plan/PlanResults";
 import type { PlanData } from "../components/plan/PlanResults";
 import type { MaccItem } from "../components/plan/MaccChart";
+import type { FrontierPoint } from "../components/plan/BudgetFrontierChart";
 
 
 interface PlanPageProps {
@@ -26,6 +27,7 @@ export function PlanPage({ embeddedFactoryId, onBackToDashboard }: PlanPageProps
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [plans, setPlans] = useState<PlanData[]>([]);
   const [macc, setMacc] = useState<MaccItem[]>([]);
+  const [frontier, setFrontier] = useState<FrontierPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState<boolean>(true);
   const [lastTargetPct, setLastTargetPct] = useState<number>(20);
@@ -90,6 +92,7 @@ export function PlanPage({ embeddedFactoryId, onBackToDashboard }: PlanPageProps
       const response = await apiClient<{
         plans: PlanData[];
         macc: MaccItem[];
+        frontier?: FrontierPoint[];
       }>(`/factories/${activeFactoryId}/plans`, {
         method: "POST",
         body: JSON.stringify(params),
@@ -97,6 +100,9 @@ export function PlanPage({ embeddedFactoryId, onBackToDashboard }: PlanPageProps
 
       setPlans(response.plans);
       setMacc(response.macc);
+      if (response.frontier) {
+        setFrontier(response.frontier);
+      }
       setShowForm(false);
     } catch (err: any) {
       console.error("Plan generation error:", err);
@@ -203,6 +209,7 @@ export function PlanPage({ embeddedFactoryId, onBackToDashboard }: PlanPageProps
         <PlanResults
           plans={plans}
           macc={macc}
+          frontier={frontier}
           factoryId={activeFactoryId || ""}
           targetReductionPct={lastTargetPct}
           onSelectPlan={handleSelectPlan}

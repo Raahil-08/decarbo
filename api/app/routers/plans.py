@@ -5,7 +5,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
 from app.auth import AuthenticatedUser, require_factory_access
@@ -28,6 +28,7 @@ from app.models.models import (
 )
 from app.optimizer.combinations import _calc_pool_state_emissions, generate_pool_combinations
 from app.optimizer.evaluator import re_evaluate_with_tightening
+from app.optimizer.frontier import compute_budget_frontier
 from app.optimizer.macc import generate_macc_curve
 from app.optimizer.solver import OptimizerSolver
 
@@ -35,8 +36,8 @@ router = APIRouter(prefix="/factories", tags=["plans"])
 
 
 class GeneratePlansRequest(BaseModel):
-    budget_inr: float
-    target_reduction_pct: float | None = None
+    budget_inr: float = Field(..., gt=0)
+    target_reduction_pct: float | None = Field(None, ge=0, le=100)
     horizon_months: int = 24
     max_payback_months: float | None = None
     max_difficulty: int | None = None
@@ -74,6 +75,7 @@ class PlanResponse(BaseModel):
     is_selected: bool = False
     totals: dict[str, Any]
     ledger: list[PlanItemResponse]
+    uncertainty: dict[str, Any] | None = None
 
 
 class MaccItemResponse(BaseModel):
@@ -92,6 +94,7 @@ class GeneratePlansResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     plans: list[PlanResponse]
     macc: list[MaccItemResponse]
+    frontier: list[dict[str, Any]] = []
 
 
 @router.post(
@@ -292,13 +295,17 @@ def generate_plans(
     plan_responses: list[PlanResponse] = []
 
     # Store Plan A
+    totals_a = {**plan_a_raw["totals"]}
+    if plan_a_raw.get("uncertainty"):
+        totals_a["uncertainty"] = plan_a_raw["uncertainty"]
+
     plan_a_db = Plan(
         id=uuid.uuid4(),
         factory_id=factory.id,
         calc_run_id=calc_run.id,
         mode="best_value",
         inputs=req.model_dump(),
-        totals=plan_a_raw["totals"],
+        totals=totals_a,
         feasible=plan_a_raw["feasible"],
         message=plan_a_raw["message"],
         is_selected=True,
@@ -328,8 +335,9 @@ def generate_plans(
         message=plan_a_raw["message"],
         duplicate_of=None,
         is_selected=True,
-        totals=plan_a_raw["totals"],
+        totals=totals_a,
         ledger=[PlanItemResponse(**item) for item in plan_a_raw["ledger"]],
+        uncertainty=plan_a_raw.get("uncertainty"),
     ))
 
     # Store Plan B (if target was given)
@@ -339,13 +347,17 @@ def generate_plans(
         if dup_of_b:
             msg_b = "Best value and Lowest investment are the same plan"
 
+        totals_b = {**plan_b_raw["totals"]}
+        if plan_b_raw.get("uncertainty"):
+            totals_b["uncertainty"] = plan_b_raw["uncertainty"]
+
         plan_b_db = Plan(
             id=uuid.uuid4(),
             factory_id=factory.id,
             calc_run_id=calc_run.id,
             mode="min_capex_for_target",
             inputs=req.model_dump(),
-            totals=plan_b_raw["totals"],
+            totals=totals_b,
             feasible=plan_b_raw["feasible"],
             message=msg_b,
             is_selected=False,
@@ -375,8 +387,9 @@ def generate_plans(
             message=msg_b,
             duplicate_of=dup_of_b,
             is_selected=False,
-            totals=plan_b_raw["totals"],
+            totals=totals_b,
             ledger=[PlanItemResponse(**item) for item in plan_b_raw["ledger"]],
+            uncertainty=plan_b_raw.get("uncertainty"),
         ))
 
     # Store Plan C
@@ -392,13 +405,17 @@ def generate_plans(
     elif dup_of_c == "min_capex_for_target":
         msg_c = "Lowest investment and Biggest cut are the same plan"
 
+    totals_c = {**plan_c_raw["totals"]}
+    if plan_c_raw.get("uncertainty"):
+        totals_c["uncertainty"] = plan_c_raw["uncertainty"]
+
     plan_c_db = Plan(
         id=uuid.uuid4(),
         factory_id=factory.id,
         calc_run_id=calc_run.id,
         mode="max_reduction_in_budget",
         inputs=req.model_dump(),
-        totals=plan_c_raw["totals"],
+        totals=totals_c,
         feasible=plan_c_raw["feasible"],
         message=msg_c,
         is_selected=False,
@@ -428,8 +445,9 @@ def generate_plans(
         message=msg_c,
         duplicate_of=dup_of_c,
         is_selected=False,
-        totals=plan_c_raw["totals"],
+        totals=totals_c,
         ledger=[PlanItemResponse(**item) for item in plan_c_raw["ledger"]],
+        uncertainty=plan_c_raw.get("uncertainty"),
     ))
 
     db.commit()
@@ -445,9 +463,24 @@ def generate_plans(
         selected_plan_codes=selected_codes,
     )
 
+    # 8. Compute Budget Frontier (PRD §13.6)
+    frontier = compute_budget_frontier(
+        solver=solver,
+        user_budget_inr=req.budget_inr,
+        baseline_total_kg=baseline_total_kg,
+        baseline_state=baseline_state,
+        tariff_inr=tariff_inr,
+        emission_factors_map=factors_map,
+        pool_costs=pool_costs,
+        weights=req.weights,
+        excluded_codes=req.excluded_codes,
+        forced_codes=req.forced_codes,
+    )
+
     return GeneratePlansResponse(
         plans=plan_responses,
         macc=[MaccItemResponse(**b) for b in macc_bars],
+        frontier=frontier,
     )
 
 
@@ -549,6 +582,7 @@ def get_plan(
         is_selected=plan.is_selected,
         totals=plan.totals,
         ledger=ledger,
+        uncertainty=plan.totals.get("uncertainty") if isinstance(plan.totals, dict) else None,
     )
 
 

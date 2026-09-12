@@ -118,6 +118,7 @@ class DashboardResponse(BaseModel):
     leak_points: list[LeakPointItem]
     drift_alerts: list[DriftAlertItem]
     provenance_items: list[ProvenanceItem]
+    circularity: dict[str, Any] | None = None
 
 
 CATEGORY_LABELS: dict[str, str] = {
@@ -568,4 +569,5 @@ def get_factory_dashboard(
         leak_points=leak_points_res,
         drift_alerts=drift_alerts_res,
         provenance_items=provenance_items,
+        circularity=summary_data.get("circularity"),
     )

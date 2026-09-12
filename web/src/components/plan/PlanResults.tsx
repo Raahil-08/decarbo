@@ -8,6 +8,8 @@ import type { PlanLedgerItem } from "./PlanLedger";
 import { MaccChart } from "./MaccChart";
 import type { MaccItem } from "./MaccChart";
 import { PlanExplanationCard } from "./PlanExplanationCard";
+import { BudgetFrontierChart } from "./BudgetFrontierChart";
+import type { FrontierPoint } from "./BudgetFrontierChart";
 
 export interface PlanData {
   id: string;
@@ -30,6 +32,16 @@ export interface PlanData {
     payback_months?: number | null;
     baseline_tco2e?: number;
     net_five_year_savings_inr?: number;
+    uncertainty?: any;
+  };
+  uncertainty?: {
+    n_samples: number;
+    seed: number;
+    prob_target_met: number;
+    tco2_cut: { p10: number; p50: number; p90: number };
+    annual_savings_inr: { p10: number; p50: number; p90: number };
+    capex_inr: { p10: number; p50: number; p90: number };
+    payback_months: { p10: number | null; p50: number | null; p90: number | null };
   };
   ledger: PlanLedgerItem[];
 }
@@ -37,6 +49,7 @@ export interface PlanData {
 interface PlanResultsProps {
   plans: PlanData[];
   macc: MaccItem[];
+  frontier?: FrontierPoint[];
   factoryId?: string;
   targetReductionPct?: number;
   onSelectPlan: (planId: string) => Promise<void>;
@@ -45,6 +58,7 @@ interface PlanResultsProps {
 export function PlanResults({
   plans,
   macc,
+  frontier = [],
   factoryId,
   targetReductionPct = 20,
   onSelectPlan,
@@ -223,6 +237,30 @@ export function PlanResults({
         </div>
       )}
 
+      {/* Monte Carlo Uncertainty Banner (PRD §13.5) */}
+      {(() => {
+        const unc = activePlan.uncertainty || (activePlan.totals as any)?.uncertainty;
+        if (!unc) return null;
+        return (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-leaf/5 border border-leaf/20 rounded-lg text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-ink">
+              <span className="w-2 h-2 rounded-full bg-leaf shrink-0" />
+              <span className="font-semibold text-leaf">
+                Cuts {unc.tco2_cut?.p10?.toFixed(1)}–{unc.tco2_cut?.p90?.toFixed(1)} t a year{" "}
+                <span className="text-muted font-normal">(most likely {unc.tco2_cut?.p50?.toFixed(1)} t)</span>
+              </span>
+              <span className="text-rule hidden sm:inline">•</span>
+              <span className="font-medium text-ink">
+                {Math.round((unc.prob_target_met ?? 1.0) * 100)}% chance of reaching your {targetReductionPct}% target
+              </span>
+            </div>
+            <span className="text-[10px] text-muted font-mono self-start sm:self-auto bg-paper px-2 py-0.5 rounded border border-rule">
+              Monte Carlo P10–P90 (N=1,000, seed=42)
+            </span>
+          </div>
+        );
+      })()}
+
       {/* Headline Totals Strip with Large Tabular Numerals (PRD §17.4) */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {/* Total Investment */}
@@ -238,6 +276,15 @@ export function PlanResults({
           <span className="text-[11px] text-muted font-mono mt-0.5 block">
             {formatINR(activeCapex)}
           </span>
+          {(() => {
+            const unc = activePlan.uncertainty || (activePlan.totals as any)?.uncertainty;
+            if (!unc?.capex_inr) return null;
+            return (
+              <span className="text-[10px] text-muted/80 font-mono mt-1 block">
+                P10–P90: {formatINR(unc.capex_inr.p10)} – {formatINR(unc.capex_inr.p90)}
+              </span>
+            );
+          })()}
         </div>
 
         {/* Annual CO2 Cut */}
@@ -251,6 +298,15 @@ export function PlanResults({
           <span className="text-[11px] text-leaf font-bold font-mono mt-0.5 block">
             {activeReductionPct.toFixed(1)}% of footprint
           </span>
+          {(() => {
+            const unc = activePlan.uncertainty || (activePlan.totals as any)?.uncertainty;
+            if (!unc?.tco2_cut) return null;
+            return (
+              <span className="text-[10px] text-leaf/80 font-mono mt-1 block">
+                P10–P90: {unc.tco2_cut.p10.toFixed(1)} – {unc.tco2_cut.p90.toFixed(1)} t
+              </span>
+            );
+          })()}
         </div>
 
         {/* Annual Savings */}
@@ -266,6 +322,15 @@ export function PlanResults({
           <span className="text-[11px] text-muted font-mono mt-0.5 block">
             +{formatINR(activeSavings)} / yr
           </span>
+          {(() => {
+            const unc = activePlan.uncertainty || (activePlan.totals as any)?.uncertainty;
+            if (!unc?.annual_savings_inr) return null;
+            return (
+              <span className="text-[10px] text-muted/80 font-mono mt-1 block">
+                P10–P90: {formatINR(unc.annual_savings_inr.p10)} – {formatINR(unc.annual_savings_inr.p90)}
+              </span>
+            );
+          })()}
         </div>
 
         {/* Simple Payback */}
@@ -283,6 +348,15 @@ export function PlanResults({
               ? `~${Math.round(activePaybackYears * 12)} months`
               : "Full capital recovery"}
           </span>
+          {(() => {
+            const unc = activePlan.uncertainty || (activePlan.totals as any)?.uncertainty;
+            if (!unc?.payback_months?.p10) return null;
+            return (
+              <span className="text-[10px] text-muted/80 font-mono mt-1 block">
+                P10–P90: {unc.payback_months.p10.toFixed(1)} – {unc.payback_months.p90.toFixed(1)} mo
+              </span>
+            );
+          })()}
         </div>
 
         {/* 5-Year Net ROI */}
@@ -399,6 +473,17 @@ export function PlanResults({
           <PlanLedger
             items={activePlan.ledger}
             totals={normalizedTotals}
+            targetReductionPct={targetReductionPct}
+          />
+        </div>
+      )}
+
+      {/* Budget Frontier Step Chart (PRD §13.6) */}
+      {frontier && frontier.length > 0 && (
+        <div className="pt-4">
+          <BudgetFrontierChart
+            frontier={frontier}
+            userBudgetInr={activeCapex}
             targetReductionPct={targetReductionPct}
           />
         </div>

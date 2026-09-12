@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from app.config import get_settings
 from app.routers import (
     calc,
+    chat,
     dashboard,
     explanation,
     factories,
@@ -13,6 +14,7 @@ from app.routers import (
     plans,
     reports,
     simulate,
+    tracking,
     uploads,
 )
 
@@ -75,6 +77,8 @@ app.include_router(plans.router, prefix="/api/v1")
 app.include_router(simulate.router, prefix="/api/v1")
 app.include_router(explanation.router, prefix="/api/v1")
 app.include_router(reports.router, prefix="/api/v1")
+app.include_router(tracking.router, prefix="/api/v1")
+app.include_router(chat.router, prefix="/api/v1")
 
 
 

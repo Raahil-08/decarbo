@@ -174,6 +174,17 @@ def detect_drift(monthly_records: list[dict[str, Any]], threshold: float = 0.10)
             "Common causes: compressed-air leaks, idle machines left running, worn tooling."
         )
 
+    series = [
+        {
+            "month": rec.get("month"),
+            "kwh": round(float(rec.get("kwh", 0.0)), 2),
+            "output": round(float(rec.get("output", 0.0)), 2),
+            "intensity": round(float(val), 2),
+            "is_recent": idx >= len(intensities) - recent_window,
+        }
+        for idx, (rec, val) in enumerate(zip(valid_records, intensities))
+    ]
+
     return {
         "has_drift": has_drift,
         "drift_pct": round(drift_pct, 4),
@@ -181,6 +192,7 @@ def detect_drift(monthly_records: list[dict[str, Any]], threshold: float = 0.10)
         "mean_prior_intensity": round(mean_prior, 2),
         "message": msg,
         "anomalies": anomalies,
+        "series": series,
     }
 
 
