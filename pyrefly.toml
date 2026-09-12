@@ -1,0 +1,9 @@
+project-includes = [
+    "api",
+    "scripts",
+]
+search-path = [
+    "api",
+    "scripts",
+]
+python-interpreter-path = "api/.venv/bin/python3"
