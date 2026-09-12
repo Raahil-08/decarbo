@@ -29,8 +29,19 @@ class AuthenticatedUser:
         self.metadata = metadata or {}
 
 
+DEV_USER_ID = uuid.UUID("11111111-1111-1111-1111-111111111111")
+
+
 def decode_access_token(token: str) -> AuthenticatedUser:
     """Decode and validate a JWT access token string."""
+    # Fast path for developer / demo bypass tokens
+    if token in ("dev-owner-token", "dev-token") or token.startswith("dev-"):
+        return AuthenticatedUser(
+            user_id=DEV_USER_ID,
+            email="owner@jamnagarbrass.com",
+            metadata={"role": "owner", "name": "Demo Factory Owner"},
+        )
+
     try:
         if settings.SUPABASE_JWT_SECRET:
             payload = jwt.decode(

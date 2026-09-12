@@ -239,9 +239,13 @@ export function Dashboard() {
       setFactories((prev) => [...prev, created]);
       setSelectedFactoryId(created.id);
       setIsCreateModalOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to create factory", err);
-      alert("Failed to create factory. Please check inputs.");
+      const msg =
+        err?.error?.details?.msg ||
+        err?.error?.message_key ||
+        (err instanceof Error ? err.message : "Please check API connection and inputs.");
+      alert(`Failed to create factory: ${msg}`);
     } finally {
       setCreatingFactory(false);
     }
@@ -289,8 +293,13 @@ export function Dashboard() {
         method: "POST",
       });
       setRefreshTrigger((c) => c + 1);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Failed to quick-seed demo factory", err);
+      const msg =
+        err?.error?.details?.msg ||
+        err?.error?.message_key ||
+        (err instanceof Error ? err.message : "Ensure API is running on port 8000.");
+      alert(`Failed to load demo factory: ${msg}`);
     } finally {
       setCreatingFactory(false);
     }
