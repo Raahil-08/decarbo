@@ -179,6 +179,19 @@ const translations: Record<Locale, Record<string, string>> = {
     save_as_target: "Open in Decarbonisation Planner",
     lever_difficulty_label: "Difficulty Level {level}",
     filter_by_category: "Category",
+
+    // AI Explanation (Phase 8)
+    ai_explanation_title: "AI Plan Explanation",
+    ai_explanation_subtitle: "Executive summary grounded in verified calculation numbers",
+    ai_grounded_badge: "Verified Grounded",
+    ai_template_badge: "Deterministic Template",
+    ai_cached_badge: "Cached",
+    regenerate_explanation: "Regenerate",
+    explanation_loading: "Generating plain-language explanation...",
+    explanation_error: "Unable to generate plan explanation. Please try again.",
+    lang_en: "English",
+    lang_gu: "ગુજરાતી",
+    lang_hi: "हिंदी",
   },
   gu: {
     // Header & Navigation
@@ -350,6 +363,19 @@ const translations: Record<Locale, Record<string, string>> = {
     save_as_target: "ડીકાર્બનાઇઝેશન પ્લાનરમાં ખોલો",
     lever_difficulty_label: "મુશ્કેલી સ્તર {level}",
     filter_by_category: "શ્રેણી",
+
+    // AI Explanation (Phase 8)
+    ai_explanation_title: "AI યોજના સમજૂતી",
+    ai_explanation_subtitle: "ચકાસાયેલ ગણતરી આંકડાઓ પર આધારિત સરળ ભાષા સારાંશ",
+    ai_grounded_badge: "ચકાસાયેલ આધારિત",
+    ai_template_badge: "નિયમિત ટેમ્પલેટ",
+    ai_cached_badge: "કેશ્ડ",
+    regenerate_explanation: "ફરી બનાવો",
+    explanation_loading: "સરળ ભાષામાં સમજૂતી તૈયાર થઈ રહી છે...",
+    explanation_error: "યોજના સમજૂતી લાવવામાં અસમર્થ. કૃપા કરીને ફરી પ્રયાસ કરો.",
+    lang_en: "English",
+    lang_gu: "ગુજરાતી",
+    lang_hi: "हिंदी",
   },
   hi: {
     // Header & Navigation
@@ -521,6 +547,19 @@ const translations: Record<Locale, Record<string, string>> = {
     save_as_target: "डीकार्बोनाइजेशन प्लानर में खोलें",
     lever_difficulty_label: "कठिनाई स्तर {level}",
     filter_by_category: "श्रेणी",
+
+    // AI Explanation (Phase 8)
+    ai_explanation_title: "AI योजना स्पष्टीकरण",
+    ai_explanation_subtitle: "सत्यापित गणना आंकड़ों पर आधारित सरल भाषा सारांश",
+    ai_grounded_badge: "सत्यापित आधारित",
+    ai_template_badge: "नियमित टेम्पलेट",
+    ai_cached_badge: "कैश्ड",
+    regenerate_explanation: "पुनः उत्पन्न करें",
+    explanation_loading: "सरल भाषा में स्पष्टीकरण तैयार किया जा रहा है...",
+    explanation_error: "योजना स्पष्टीकरण प्राप्त करने में असमर्थ। कृपया पुनः प्रयास करें।",
+    lang_en: "English",
+    lang_gu: "ગુજરાતી",
+    lang_hi: "हिंदी",
   },
 };
 

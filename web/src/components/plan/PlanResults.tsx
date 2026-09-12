@@ -6,6 +6,7 @@ import { PlanLedger } from "./PlanLedger";
 import type { PlanLedgerItem } from "./PlanLedger";
 import { MaccChart } from "./MaccChart";
 import type { MaccItem } from "./MaccChart";
+import { PlanExplanationCard } from "./PlanExplanationCard";
 
 export interface PlanData {
   id: string;
@@ -16,11 +17,16 @@ export interface PlanData {
   duplicate_of?: string | null;
   is_selected: boolean;
   totals: {
-    total_capex_inr: number;
-    annual_gross_savings_inr: number;
-    annual_reduction_tco2e: number;
-    reduction_pct: number;
+    total_capex_inr?: number;
+    capex_inr?: number;
+    annual_gross_savings_inr?: number;
+    annual_savings_inr?: number;
+    annual_reduction_tco2e?: number;
+    reduction_tco2e?: number;
+    reduction_kg?: number;
+    reduction_pct?: number;
     payback_years?: number | null;
+    payback_months?: number | null;
     baseline_tco2e?: number;
     net_five_year_savings_inr?: number;
   };
@@ -38,11 +44,23 @@ interface PlanResultsProps {
 export function PlanResults({
   plans,
   macc,
+  factoryId,
   targetReductionPct = 20,
   onSelectPlan,
 }: PlanResultsProps) {
-
   const { t } = useI18n();
+
+  // Helper getters for robust field access across API variations
+  const getCapex = (p: PlanData) => p.totals.total_capex_inr ?? p.totals.capex_inr ?? 0;
+  const getSavings = (p: PlanData) => p.totals.annual_gross_savings_inr ?? p.totals.annual_savings_inr ?? 0;
+  const getReductionTco2e = (p: PlanData) =>
+    p.totals.annual_reduction_tco2e ?? p.totals.reduction_tco2e ?? ((p.totals.reduction_kg ?? 0) / 1000);
+  const getReductionPct = (p: PlanData) => p.totals.reduction_pct ?? 0;
+  const getPaybackYears = (p: PlanData) => {
+    if (p.totals.payback_years !== undefined && p.totals.payback_years !== null) return p.totals.payback_years;
+    if (p.totals.payback_months !== undefined && p.totals.payback_months !== null) return p.totals.payback_months / 12;
+    return null;
+  };
 
   // Find initial selected or default to first plan
   const [activePlanId, setActivePlanId] = useState<string>(() => {
@@ -81,10 +99,25 @@ export function PlanResults({
     in_selected_plan: activeCodes.has(m.code),
   }));
 
+  const activeCapex = getCapex(activePlan);
+  const activeSavings = getSavings(activePlan);
+  const activeReductionTco2e = getReductionTco2e(activePlan);
+  const activeReductionPct = getReductionPct(activePlan);
+  const activePaybackYears = getPaybackYears(activePlan);
+
+  const normalizedTotals = {
+    total_capex_inr: activeCapex,
+    annual_gross_savings_inr: activeSavings,
+    annual_reduction_tco2e: activeReductionTco2e,
+    reduction_pct: activeReductionPct,
+    payback_years: activePaybackYears,
+    baseline_tco2e: activePlan.totals.baseline_tco2e,
+  };
+
   // Net 5-year savings calculation
   const fiveYearNet =
     activePlan.totals.net_five_year_savings_inr ??
-    activePlan.totals.annual_gross_savings_inr * 5 - activePlan.totals.total_capex_inr;
+    (activeSavings * 5 - activeCapex);
 
   return (
     <div className="space-y-6">
@@ -93,6 +126,9 @@ export function PlanResults({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {plans.map((plan) => {
             const isActive = plan.id === activePlanId;
+            const planCapex = getCapex(plan);
+            const planReductionPct = getReductionPct(plan);
+
             return (
               <button
                 key={plan.id}
@@ -128,12 +164,10 @@ export function PlanResults({
                 {/* Subtitle / summary metric */}
                 <div className="flex items-center justify-between text-xs font-mono mt-1">
                   <span className="text-leaf font-bold">
-                    {plan.totals.reduction_pct.toFixed(1)}% cut
+                    {planReductionPct.toFixed(1)}% cut
                   </span>
                   <span className="text-brass font-medium">
-                    {plan.totals.total_capex_inr >= 100000
-                      ? formatLakh(plan.totals.total_capex_inr)
-                      : formatINR(plan.totals.total_capex_inr)}
+                    {planCapex >= 100000 ? formatLakh(planCapex) : formatINR(planCapex)}
                   </span>
                 </div>
 
@@ -179,12 +213,12 @@ export function PlanResults({
             {t("plan_headline_investment")}
           </span>
           <div className="text-xl sm:text-2xl font-bold font-mono text-brass mt-1 tracking-tight">
-            {activePlan.totals.total_capex_inr >= 100000
-              ? formatLakh(activePlan.totals.total_capex_inr)
-              : formatINR(activePlan.totals.total_capex_inr)}
+            {activeCapex >= 100000
+              ? formatLakh(activeCapex)
+              : formatINR(activeCapex)}
           </div>
           <span className="text-[11px] text-muted font-mono mt-0.5 block">
-            {formatINR(activePlan.totals.total_capex_inr)}
+            {formatINR(activeCapex)}
           </span>
         </div>
 
@@ -194,10 +228,10 @@ export function PlanResults({
             {t("plan_headline_co2_cut")}
           </span>
           <div className="text-xl sm:text-2xl font-bold font-mono text-leaf mt-1 tracking-tight">
-            {activePlan.totals.annual_reduction_tco2e.toFixed(1)} t
+            {activeReductionTco2e.toFixed(1)} t
           </div>
           <span className="text-[11px] text-leaf font-bold font-mono mt-0.5 block">
-            {activePlan.totals.reduction_pct.toFixed(1)}% of footprint
+            {activeReductionPct.toFixed(1)}% of footprint
           </span>
         </div>
 
@@ -207,12 +241,12 @@ export function PlanResults({
             {t("plan_headline_savings")}
           </span>
           <div className="text-xl sm:text-2xl font-bold font-mono text-leaf mt-1 tracking-tight">
-            {activePlan.totals.annual_gross_savings_inr >= 100000
-              ? formatLakh(activePlan.totals.annual_gross_savings_inr)
-              : formatINR(activePlan.totals.annual_gross_savings_inr)}
+            {activeSavings >= 100000
+              ? formatLakh(activeSavings)
+              : formatINR(activeSavings)}
           </div>
           <span className="text-[11px] text-muted font-mono mt-0.5 block">
-            +{formatINR(activePlan.totals.annual_gross_savings_inr)} / yr
+            +{formatINR(activeSavings)} / yr
           </span>
         </div>
 
@@ -222,13 +256,13 @@ export function PlanResults({
             {t("plan_headline_payback")}
           </span>
           <div className="text-xl sm:text-2xl font-bold font-mono text-ink mt-1 tracking-tight">
-            {activePlan.totals.payback_years !== null && activePlan.totals.payback_years !== undefined
-              ? `${activePlan.totals.payback_years.toFixed(1)} yr`
+            {activePaybackYears !== null && activePaybackYears !== undefined
+              ? `${activePaybackYears.toFixed(1)} yr`
               : "-"}
           </div>
           <span className="text-[11px] text-muted mt-0.5 block">
-            {activePlan.totals.payback_years && activePlan.totals.payback_years < 1
-              ? `~${Math.round(activePlan.totals.payback_years * 12)} months`
+            {activePaybackYears && activePaybackYears < 1
+              ? `~${Math.round(activePaybackYears * 12)} months`
               : "Full capital recovery"}
           </span>
         </div>
@@ -248,6 +282,13 @@ export function PlanResults({
           </span>
         </div>
       </div>
+
+      {/* AI Plan Explanation Card */}
+      <PlanExplanationCard
+        planId={activePlan.id}
+        factoryId={factoryId}
+        planMode={activePlan.mode}
+      />
 
       {/* Action Bar & Section Nav */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
@@ -314,7 +355,7 @@ export function PlanResults({
         <div className="space-y-6">
           <PlanLedger
             items={activePlan.ledger}
-            totals={activePlan.totals}
+            totals={normalizedTotals}
             targetReductionPct={targetReductionPct}
           />
           {/* Also include MACC below the ledger for complete view */}
@@ -325,7 +366,7 @@ export function PlanResults({
           <MaccChart items={contextualMacc} />
           <PlanLedger
             items={activePlan.ledger}
-            totals={activePlan.totals}
+            totals={normalizedTotals}
             targetReductionPct={targetReductionPct}
           />
         </div>

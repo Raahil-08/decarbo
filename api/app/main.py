@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import get_settings
-from app.routers import calc, dashboard, factories, health, plans, simulate, uploads
+from app.routers import calc, dashboard, explanation, factories, health, plans, simulate, uploads
 
 settings = get_settings()
 
@@ -63,6 +63,7 @@ app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(uploads.router, prefix="/api/v1")
 app.include_router(plans.router, prefix="/api/v1")
 app.include_router(simulate.router, prefix="/api/v1")
+app.include_router(explanation.router, prefix="/api/v1")
 
 
 
