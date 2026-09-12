@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Check, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
+import { Check, CheckCircle2, AlertTriangle, FileText, Loader2 } from "lucide-react";
 import { useI18n } from "../../lib/i18n";
 import { formatINR, formatLakh } from "../../lib/format";
+import { generatePlanReport, downloadReportFile } from "../../lib/api";
 import { PlanLedger } from "./PlanLedger";
 import type { PlanLedgerItem } from "./PlanLedger";
 import { MaccChart } from "./MaccChart";
@@ -48,7 +49,7 @@ export function PlanResults({
   targetReductionPct = 20,
   onSelectPlan,
 }: PlanResultsProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   // Helper getters for robust field access across API variations
   const getCapex = (p: PlanData) => p.totals.total_capex_inr ?? p.totals.capex_inr ?? 0;
@@ -70,6 +71,8 @@ export function PlanResults({
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [activeView, setActiveView] = useState<"ledger" | "macc">("ledger");
+  const [isDownloadingReport, setIsDownloadingReport] = useState(false);
+  const [reportDownloadError, setReportDownloadError] = useState<string | null>(null);
 
   // Keep activePlanId updated if plans change
   useEffect(() => {
@@ -89,6 +92,21 @@ export function PlanResults({
       await onSelectPlan(activePlan.id);
     } finally {
       setIsSelecting(false);
+    }
+  };
+
+  const handleDownloadReport = async () => {
+    if (!activePlan) return;
+    setIsDownloadingReport(true);
+    setReportDownloadError(null);
+    try {
+      const res = await generatePlanReport(activePlan.id, locale);
+      await downloadReportFile(res.report_id, `decarbo_report_${locale}_${activePlan.mode}.pdf`);
+    } catch (err: unknown) {
+      console.error("Failed to generate/download report:", err);
+      setReportDownloadError(err instanceof Error ? err.message : "Failed to generate report");
+    } finally {
+      setIsDownloadingReport(false);
     }
   };
 
@@ -339,16 +357,30 @@ export function PlanResults({
 
           <button
             type="button"
-            onClick={() => {
-              alert("PDF Report generator (Phase 9) will export this plan ledger in English/Gujarati.");
-            }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-medium text-ink bg-white hover:bg-paper border border-rule transition-colors shadow-xs"
+            disabled={isDownloadingReport}
+            onClick={handleDownloadReport}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-medium text-ink bg-white hover:bg-paper border border-rule transition-colors shadow-xs disabled:opacity-60"
           >
-            <FileText className="w-4 h-4 text-muted" />
-            <span>{t("plan_btn_download_report")}</span>
+            {isDownloadingReport ? (
+              <Loader2 className="w-4 h-4 text-brass animate-spin" />
+            ) : (
+              <FileText className="w-4 h-4 text-muted" />
+            )}
+            <span>
+              {isDownloadingReport
+                ? t("plan_btn_generating_report")
+                : t("plan_btn_download_report")}
+            </span>
           </button>
         </div>
       </div>
+
+      {reportDownloadError && (
+        <div className="p-3 text-xs bg-ember/10 border border-ember/30 rounded-md text-ember flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>{reportDownloadError}</span>
+        </div>
+      )}
 
       {/* Main Content Area: Ledger or MACC */}
       {activeView === "ledger" ? (

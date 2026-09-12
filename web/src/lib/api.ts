@@ -45,3 +45,48 @@ export async function apiClient<T>(
 
   return response.json();
 }
+
+export interface ReportResponse {
+  id: string;
+  report_id: string;
+  factory_id: string;
+  plan_id: string;
+  locale: string;
+  storage_path: string;
+  download_url: string;
+  created_at: string;
+}
+
+export async function generatePlanReport(planId: string, locale: string = "en"): Promise<ReportResponse> {
+  return apiClient<ReportResponse>(`/plans/${planId}/report`, {
+    method: "POST",
+    body: JSON.stringify({ locale }),
+  });
+}
+
+export async function downloadReportFile(reportId: string, filename?: string): Promise<void> {
+  const devToken = localStorage.getItem("decarbo_dev_token");
+  let token: string | null | undefined = devToken;
+  if (!token) {
+    const session = (await supabase.auth.getSession()).data.session;
+    token = session?.access_token;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/reports/${reportId}/download`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to download PDF report");
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || `decarbo_report_${reportId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}

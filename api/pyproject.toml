@@ -23,6 +23,8 @@ dependencies = [
     "python-multipart>=0.0.9",
     "reportlab>=4.2.0",
     "ortools>=9.15.6755",
+    "weasyprint>=70.0",
+    "matplotlib>=3.11.2",
 ]
 
 [dependency-groups]

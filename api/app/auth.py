@@ -29,24 +29,9 @@ class AuthenticatedUser:
         self.metadata = metadata or {}
 
 
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials | None = Security(security_scheme),
-) -> AuthenticatedUser:
-    if not credentials:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={
-                "error": {
-                    "code": "UNAUTHORIZED",
-                    "message_key": "errors.unauthorized",
-                    "details": {},
-                }
-            },
-        )
-
-    token = credentials.credentials
+def decode_access_token(token: str) -> AuthenticatedUser:
+    """Decode and validate a JWT access token string."""
     try:
-        # In test / dev with dummy or secret:
         if settings.SUPABASE_JWT_SECRET:
             payload = jwt.decode(
                 token,
@@ -55,7 +40,6 @@ async def get_current_user(
                 audience="authenticated",
             )
         else:
-            # Decode without verification for mock tokens in local tests if unverified
             payload = jwt.decode(
                 token,
                 options={"verify_signature": False},
@@ -91,6 +75,24 @@ async def get_current_user(
                 }
             },
         )
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Security(security_scheme),
+) -> AuthenticatedUser:
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={
+                "error": {
+                    "code": "UNAUTHORIZED",
+                    "message_key": "errors.unauthorized",
+                    "details": {},
+                }
+            },
+        )
+
+    return decode_access_token(credentials.credentials)
 
 
 def require_factory_access(min_role: str = "viewer"):

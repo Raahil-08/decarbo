@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+<head>
+<meta charset="UTF-8">
+<title>{{ t.report_title }} - {{ factory.name }}</title>
+<style>
+  @font-face {
+    font-family: 'IBMPlexSans';
+    src: url('file://{{ fonts_dir }}/IBMPlexSans.ttf');
+    font-weight: 400 700;
+  }
+  @font-face {
+    font-family: 'HindVadodara';
+    src: url('file://{{ fonts_dir }}/HindVadodara-Regular.ttf');
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: 'HindVadodara';
+    src: url('file://{{ fonts_dir }}/HindVadodara-Medium.ttf');
+    font-weight: 500;
+  }
+  @font-face {
+    font-family: 'HindVadodara';
+    src: url('file://{{ fonts_dir }}/HindVadodara-SemiBold.ttf');
+    font-weight: 600 700;
+  }
+  @font-face {
+    font-family: 'Hind';
+    src: url('file://{{ fonts_dir }}/Hind-Regular.ttf');
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: 'Hind';
+    src: url('file://{{ fonts_dir }}/Hind-Medium.ttf');
+    font-weight: 500;
+  }
+  @font-face {
+    font-family: 'Hind';
+    src: url('file://{{ fonts_dir }}/Hind-SemiBold.ttf');
+    font-weight: 600 700;
+  }
+
+  @page {
+    size: A4;
+    margin: 16mm 16mm 18mm 16mm;
+    @bottom-left {
+      content: "Decarbo — {{ t.status_badge }}";
+      font-family: 'IBMPlexSans', 'HindVadodara', 'Hind', sans-serif;
+      font-size: 8pt;
+      color: #5A6478;
+    }
+    @bottom-right {
+      content: counter(page) " / " counter(pages);
+      font-family: 'IBMPlexSans', 'HindVadodara', 'Hind', sans-serif;
+      font-size: 8pt;
+      font-weight: 600;
+      color: #5A6478;
+    }
+  }
+
+  @page:first {
+    margin: 0;
+    @bottom-left { content: none; }
+    @bottom-right { content: none; }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    {% if locale == 'gu' %}
+    font-family: 'HindVadodara', 'IBMPlexSans', sans-serif;
+    line-height: 1.55;
+    {% elif locale == 'hi' %}
+    font-family: 'Hind', 'IBMPlexSans', sans-serif;
+    line-height: 1.55;
+    {% else %}
+    font-family: 'IBMPlexSans', -apple-system, sans-serif;
+    line-height: 1.45;
+    {% endif %}
+    color: #1D2A45;
+    background-color: #FFFFFF;
+    font-size: 9.5pt;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .cover-container {
+    padding: 40mm 24mm 24mm 24mm;
+    height: 100vh;
+    background-color: #F7F8FA;
+    border-top: 10mm solid #1D2A45;
+    position: relative;
+  }
+
+  .cover-header {
+    margin-bottom: 30mm;
+  }
+
+  .brand-logo {
+    display: inline-block;
+    font-size: 26pt;
+    font-weight: 700;
+    color: #1D2A45;
+    letter-spacing: -0.5px;
+    margin-bottom: 4mm;
+  }
+
+  .brand-tagline {
+    font-size: 10.5pt;
+    color: #A97A2B;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .cover-title-block {
+    margin-bottom: 35mm;
+  }
+
+  .cover-title {
+    font-size: 23pt;
+    font-weight: 700;
+    color: #1D2A45;
+    line-height: 1.25;
+    margin-bottom: 5mm;
+  }
+
+  .cover-subtitle {
+    font-size: 12pt;
+    color: #5A6478;
+    line-height: 1.4;
+    max-width: 500px;
+  }
+
+  .cover-meta-grid {
+    border-top: 2px solid #D6DAE1;
+    padding-top: 8mm;
+    display: table;
+    width: 100%;
+  }
+
+  .meta-row {
+    display: table-row;
+  }
+
+  .meta-cell-label {
+    display: table-cell;
+    width: 35%;
+    padding: 3mm 0;
+    font-size: 9.5pt;
+    color: #5A6478;
+    font-weight: 500;
+  }
+
+  .meta-cell-value {
+    display: table-cell;
+    width: 65%;
+    padding: 3mm 0;
+    font-size: 10.5pt;
+    color: #1D2A45;
+    font-weight: 600;
+  }
+
+  .cover-footer {
+    position: absolute;
+    bottom: 20mm;
+    left: 24mm;
+    right: 24mm;
+    border-top: 1px solid #D6DAE1;
+    padding-top: 4mm;
+    font-size: 8.5pt;
+    color: #5A6478;
+  }
+
+  /* Inside Pages Layout */
+  .page-header {
+    border-bottom: 1.5px solid #1D2A45;
+    padding-bottom: 3mm;
+    margin-bottom: 5mm;
+    display: table;
+    width: 100%;
+  }
+
+  .page-header-title {
+    display: table-cell;
+    font-size: 13.5pt;
+    font-weight: 700;
+    color: #1D2A45;
+    vertical-align: bottom;
+  }
+
+  .page-header-sub {
+    display: table-cell;
+    text-align: right;
+    font-size: 8.5pt;
+    color: #5A6478;
+    vertical-align: bottom;
+  }
+
+  .subheading {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #1D2A45;
+    margin: 4mm 0 2.5mm 0;
+  }
+
+  .card-grid {
+    display: table;
+    width: 100%;
+    margin-bottom: 4.5mm;
+  }
+
+  .card-col {
+    display: table-cell;
+    width: 33.33%;
+    padding: 0 2mm;
+  }
+
+  .card-col:first-child { padding-left: 0; }
+  .card-col:last-child { padding-right: 0; }
+
+  .stat-card {
+    background-color: #F7F8FA;
+    border: 1px solid #D6DAE1;
+    border-radius: 4px;
+    padding: 3.5mm 4mm;
+  }
+
+  .stat-label {
+    font-size: 8pt;
+    color: #5A6478;
+    margin-bottom: 1.5mm;
+  }
+
+  .stat-value {
+    font-size: 15pt;
+    font-weight: 700;
+    color: #1D2A45;
+    margin-bottom: 1mm;
+  }
+
+  .stat-note {
+    font-size: 7.5pt;
+    color: #5A6478;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.8mm 2mm;
+    border-radius: 3px;
+    font-size: 7pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-leaf {
+    background-color: #EAF4EE;
+    color: #2D7A57;
+    border: 1px solid #B8E0CA;
+  }
+
+  .badge-ember {
+    background-color: #FDF2F0;
+    color: #B5432C;
+    border: 1px solid #F6CECA;
+  }
+
+  .badge-brass {
+    background-color: #F9F5EB;
+    color: #A97A2B;
+    border: 1px solid #E8DCBE;
+  }
+
+  /* Data Tables */
+  table.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2.5mm;
+    margin-bottom: 4.5mm;
+    font-size: 8.5pt;
+  }
+
+  table.report-table th {
+    background-color: #F7F8FA;
+    color: #1D2A45;
+    font-weight: 600;
+    text-align: left;
+    padding: 2.5mm 2.5mm;
+    border-bottom: 1.5px solid #1D2A45;
+    font-size: 8pt;
+  }
+
+  table.report-table td {
+    padding: 2.2mm 2.5mm;
+    border-bottom: 1px solid #D6DAE1;
+    color: #1D2A45;
+  }
+
+  table.report-table tr:nth-child(even) {
+    background-color: #FAFAFB;
+  }
+
+  /* The Signature Ledger Table */
+  table.ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 3mm;
+    margin-bottom: 5mm;
+    font-size: 8.5pt;
+    border-radius: 0;
+  }
+
+  table.ledger-table th {
+    background-color: #1D2A45;
+    color: #FFFFFF;
+    font-weight: 600;
+    text-align: left;
+    padding: 2.8mm 2.2mm;
+    font-size: 8pt;
+  }
+
+  table.ledger-table th.num,
+  table.ledger-table td.num {
+    text-align: right;
+  }
+
+  table.ledger-table td {
+    padding: 2.5mm 2.2mm;
+    border-bottom: 1px solid #D6DAE1;
+    vertical-align: top;
+  }
+
+  table.ledger-table tr.ledger-row:nth-child(even) {
+    background-color: #F7F8FA;
+  }
+
+  table.ledger-table tr.ledger-totals-row td {
+    border-top: 2px solid #1D2A45;
+    border-bottom: 3px double #1D2A45;
+    background-color: #F7F8FA;
+    font-weight: 700;
+    font-size: 9pt;
+    color: #1D2A45;
+    padding: 3mm 2.2mm;
+  }
+
+  .chart-box {
+    background-color: #FFFFFF;
+    border: 1px solid #D6DAE1;
+    border-radius: 4px;
+    padding: 3mm;
+    margin-bottom: 4mm;
+    text-align: center;
+  }
+
+  .chart-box svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .callout-box {
+    background-color: #F7F8FA;
+    border-left: 3.5px solid #A97A2B;
+    padding: 3mm 4mm;
+    margin-bottom: 4mm;
+    font-size: 8.5pt;
+    color: #1D2A45;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .narrative-card {
+    background-color: #FFFFFF;
+    border: 1px solid #D6DAE1;
+    border-radius: 4px;
+    padding: 4mm 4.5mm;
+    margin-bottom: 3.5mm;
+  }
+
+  .narrative-card h4 {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #1D2A45;
+    margin-bottom: 2mm;
+  }
+
+  .narrative-card p {
+    font-size: 8.8pt;
+    color: #1D2A45;
+    line-height: 1.5;
+  }
+
+  .signoff-grid {
+    display: table;
+    width: 100%;
+    margin-top: 10mm;
+  }
+
+  .signoff-cell {
+    display: table-cell;
+    width: 50%;
+    padding: 0 6mm;
+  }
+
+  .signoff-cell:first-child { padding-left: 0; }
+  .signoff-cell:last-child { padding-right: 0; }
+
+  .signoff-line {
+    border-bottom: 1px solid #1D2A45;
+    height: 18mm;
+    margin-bottom: 2mm;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ================= PAGE 1: COVER PAGE ================= -->
+  <div class="cover-container">
+    <div class="cover-header">
+      <div class="brand-logo">Decarbo</div>
+      <div class="brand-tagline">Industrial Decarbonisation Planner</div>
+    </div>
+
+    <div class="cover-title-block">
+      <h1 class="cover-title">{{ t.report_title }}</h1>
+      <p class="cover-subtitle">{{ t.report_subtitle }}</p>
+    </div>
+
+    <div class="cover-meta-grid">
+      <div class="meta-row">
+        <div class="meta-cell-label">{{ t.prepared_for }}</div>
+        <div class="meta-cell-value">{{ factory.name }}</div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-cell-label">{{ t.industry }}</div>
+        <div class="meta-cell-value">{{ factory.industry }}</div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-cell-label">{{ t.location }}</div>
+        <div class="meta-cell-value">{{ factory.location or "Jamnagar, Gujarat, India" }}</div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-cell-label">{{ t.baseline_period }}</div>
+        <div class="meta-cell-value">{{ period_label }}</div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-cell-label">{{ t.plan_profile }}</div>
+        <div class="meta-cell-value">{{ plan.label }}</div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-cell-label">{{ t.generated_on }}</div>
+        <div class="meta-cell-value">{{ report_date }}</div>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <span style="font-weight: 600; color: #1D2A45;">{{ t.status_badge }}</span> &bull; {{ t.engine_version }}
+    </div>
+  </div>
+
+  <!-- ================= PAGE 2: EXECUTIVE SUMMARY & BASELINE ================= -->
+  <div class="page-break"></div>
+  <div class="page-header">
+    <div class="page-header-title">{{ t.section_summary_title }}</div>
+    <div class="page-header-sub">{{ factory.name }} &bull; {{ report_date }}</div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card-col">
+      <div class="stat-card">
+        <div class="stat-label">{{ t.baseline_footprint }}</div>
+        <div class="stat-value tabular">{{ baseline_total_tco2e }} <span style="font-size: 9pt; font-weight: 500; color: #5A6478;">tCO₂e</span></div>
+        <div class="stat-note">{{ period_label }}</div>
+      </div>
+    </div>
+    <div class="card-col">
+      <div class="stat-card">
+        <div class="stat-label">{{ t.carbon_intensity }}</div>
+        <div class="stat-value tabular">{{ carbon_intensity }} <span style="font-size: 9pt; font-weight: 500; color: #5A6478;">kgCO₂e / t</span></div>
+        <div class="stat-note">{{ t.industry }}</div>
+      </div>
+    </div>
+    <div class="card-col">
+      <div class="stat-card">
+        <div class="stat-label">{{ t.electrical_intensity }}</div>
+        <div class="stat-value tabular">{{ electrical_intensity }} <span style="font-size: 9pt; font-weight: 500; color: #5A6478;">kWh / t</span></div>
+        <div class="stat-note">DISCOM Grid Metering</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout-box">
+    <strong>{{ t.data_quality_title }}:</strong>
+    {% if has_estimates %}
+      <span class="badge badge-brass" style="margin: 0 1.5mm;">{{ t.estimate_label }}</span>
+      {{ t.estimate_warning_note }}
+    {% else %}
+      <span class="badge badge-leaf" style="margin: 0 1.5mm;">{{ t.verified_label }}</span>
+      {{ t.verified_source_note }}
+    {% endif %}
+  </div>
+
+  <div class="subheading">{{ t.scope_breakdown_title }}</div>
+  <div class="chart-box">
+    {{ scope_breakdown_svg | safe }}
+  </div>
+
+  <div class="subheading">{{ t.pareto_leak_title }}</div>
+  <p style="font-size: 8pt; color: #5A6478; margin-bottom: 2mm;">{{ t.pareto_leak_subtitle }}</p>
+
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th style="width: 6%;">{{ t.rank_col }}</th>
+        <th style="width: 32%;">{{ t.activity_col }}</th>
+        <th style="width: 14%;">{{ t.scope_col }}</th>
+        <th style="width: 16%;" class="num">{{ t.share_col }}</th>
+        <th style="width: 16%;" class="num">{{ t.emissions_col }}</th>
+        <th style="width: 16%;">{{ t.fix_col }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for leak in leak_points %}
+      <tr>
+        <td><strong>#{{ loop.index }}</strong></td>
+        <td><strong>{{ leak.title }}</strong></td>
+        <td><span class="badge {% if leak.scope == 'Scope 1' %}badge-ember{% elif leak.scope == 'Scope 2' %}badge-brass{% else %}badge-leaf{% endif %}">{{ leak.scope }}</span></td>
+        <td class="num tabular"><strong>{{ leak.share_pct }}%</strong></td>
+        <td class="num tabular">{{ leak.emissions_t }} tCO₂e</td>
+        <td style="font-size: 7.5pt; color: #5A6478;">{{ leak.fix_hint }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- ================= PAGE 3: THE SIGNATURE PLAN LEDGER ================= -->
+  <div class="page-break"></div>
+  <div class="page-header">
+    <div class="page-header-title">{{ t.section_ledger_title }}</div>
+    <div class="page-header-sub">{{ plan.label }} &bull; {{ plan.ledger | length }} Measures</div>
+  </div>
+
+  <p style="font-size: 8.5pt; color: #5A6478; margin-bottom: 3mm;">{{ t.ledger_subtitle }}</p>
+
+  <table class="ledger-table">
+    <thead>
+      <tr>
+        <th style="width: 5%;">{{ t.col_order }}</th>
+        <th style="width: 33%;">{{ t.col_fix }}</th>
+        <th style="width: 14%;" class="num">{{ t.col_capex }}</th>
+        <th style="width: 14%;" class="num">{{ t.col_savings }}</th>
+        <th style="width: 13%;" class="num">{{ t.col_cuts }}</th>
+        <th style="width: 10%;" class="num">{{ t.col_payback }}</th>
+        <th style="width: 11%;" class="num">{{ t.col_running }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set running_pct = namespace(val=0.0) %}
+      {% for item in plan.ledger %}
+      {% set running_pct.val = running_pct.val + item.reduction_pct %}
+      <tr class="ledger-row">
+        <td>{{ item.sequence or loop.index }}</td>
+        <td>
+          <div style="font-weight: 600; color: #1D2A45;">{{ item.title }}</div>
+          <div style="font-size: 7pt; color: #5A6478; margin-top: 0.5mm;">
+            {{ item.category }} &bull; Level {{ item.difficulty or 1 }}
+            {% if item.cost_per_tonne_inr is not none %}
+              &bull; <span class="tabular">₹{{ item.cost_per_tonne_inr | int }}/t</span>
+            {% endif %}
+          </div>
+        </td>
+        <td class="num tabular" style="color: #A97A2B; font-weight: 600;">{{ item.capex_formatted }}</td>
+        <td class="num tabular" style="color: #2D7A57; font-weight: 600;">{{ item.savings_formatted }}</td>
+        <td class="num tabular">{{ item.reduction_tco2e }} t</td>
+        <td class="num tabular">{{ item.payback_months | round(1) if item.payback_months else "-" }}</td>
+        <td class="num tabular" style="font-weight: 600; color: #1D2A45;">{{ running_pct.val | round(1) }}%</td>
+      </tr>
+      {% endfor %}
+
+      <tr class="ledger-totals-row">
+        <td colspan="2" style="font-weight: 700; letter-spacing: 0.5px;">{{ t.totals_row_label }}</td>
+        <td class="num tabular" style="color: #A97A2B; font-size: 9.5pt;">{{ totals.capex_formatted }}</td>
+        <td class="num tabular" style="color: #2D7A57; font-size: 9.5pt;">{{ totals.savings_formatted }}</td>
+        <td class="num tabular" style="font-size: 9.5pt;">{{ totals.reduction_tco2e }} t</td>
+        <td class="num tabular" style="font-size: 9.5pt;">{{ totals.payback_formatted }}</td>
+        <td class="num tabular" style="font-size: 9.5pt; color: #2D7A57;">{{ totals.reduction_pct | round(1) }}%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout-box">
+    <strong>{{ t.ranges_title }}:</strong> {{ sensitivity_note }}
+  </div>
+
+  <!-- ================= PAGE 4: MACC CHART ================= -->
+  <div class="page-break"></div>
+  <div class="page-header">
+    <div class="page-header-title">{{ t.section_macc_title }}</div>
+    <div class="page-header-sub">{{ macc_items | length }} Abatement Levers Evaluated</div>
+  </div>
+
+  <p style="font-size: 8.5pt; color: #5A6478; margin-bottom: 3.5mm;">{{ t.macc_desc }}</p>
+
+  <div class="chart-box">
+    {{ macc_svg | safe }}
+  </div>
+
+  <div class="subheading">Marginal Abatement Cost Register</div>
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th style="width: 12%;">{{ t.macc_col_code }}</th>
+        <th style="width: 38%;">{{ t.macc_col_title }}</th>
+        <th style="width: 18%;" class="num">{{ t.macc_col_cost }}</th>
+        <th style="width: 16%;" class="num">{{ t.macc_col_potential }}</th>
+        <th style="width: 16%;">{{ t.macc_col_status }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bar in macc_items %}
+      <tr>
+        <td style="font-family: monospace; font-size: 7.5pt;">{{ bar.code }}</td>
+        <td><strong>{{ bar.title }}</strong></td>
+        <td class="num tabular" style="font-weight: 600; color: {% if bar.cost_per_tonne_inr < 0 %}#2D7A57{% else %}#A97A2B{% endif %};">
+          {{ bar.cost_per_tonne_inr | round(0) | int }}
+        </td>
+        <td class="num tabular">{{ bar.reduction_tco2e | round(1) }} t</td>
+        <td>
+          {% if bar.is_selected %}
+            <span class="badge badge-leaf">{{ t.included_in_plan }}</span>
+          {% else %}
+            <span class="badge badge-brass">{{ t.optional_measure }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- ================= PAGE 5: STRATEGIC EXPLANATION ================= -->
+  <div class="page-break"></div>
+  <div class="page-header">
+    <div class="page-header-title">{{ t.section_ai_title }}</div>
+    <div class="page-header-sub"><span class="badge badge-leaf">{{ t.grounded_badge }}</span></div>
+  </div>
+
+  <div class="narrative-card">
+    <h4>{{ t.context_title }}</h4>
+    <p>{{ explanation.context }}</p>
+  </div>
+
+  <div class="narrative-card">
+    <h4>{{ t.strategy_title }}</h4>
+    <p>{{ explanation.strategy }}</p>
+  </div>
+
+  <div class="narrative-card">
+    <h4>{{ t.quick_wins_title }}</h4>
+    <p>{{ explanation.quick_wins }}</p>
+  </div>
+
+  <div class="narrative-card">
+    <h4>{{ t.financial_title }}</h4>
+    <p>{{ explanation.financials }}</p>
+  </div>
+
+  <!-- ================= PAGE 6: METHODOLOGY & FACTOR PROVENANCE ================= -->
+  <div class="page-break"></div>
+  <div class="page-header">
+    <div class="page-header-title">{{ t.section_methodology_title }}</div>
+    <div class="page-header-sub">GHG Protocol & Central Electricity Authority (CEA)</div>
+  </div>
+
+  <p style="font-size: 8.5pt; color: #5A6478; margin-bottom: 3.5mm;">{{ t.method_desc }}</p>
+
+  <div class="callout-box" style="margin-bottom: 3.5mm;">
+    <div style="font-weight: 700; margin-bottom: 1.5mm;">{{ t.formula_title }}:</div>
+    <div style="font-family: monospace; font-size: 7.5pt; line-height: 1.5;">
+      <div>&bull; {{ t.formula_scope1 }}</div>
+      <div>&bull; {{ t.formula_scope2 }}</div>
+      <div>&bull; {{ t.formula_compounding }}</div>
+    </div>
+  </div>
+
+  <div class="subheading">{{ t.factor_table_title }}</div>
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th style="width: 28%;">{{ t.col_factor_activity }}</th>
+        <th style="width: 14%;" class="num">{{ t.col_factor_value }}</th>
+        <th style="width: 12%;">{{ t.col_factor_unit }}</th>
+        <th style="width: 24%;">{{ t.col_factor_source }}</th>
+        <th style="width: 12%;">{{ t.col_factor_version }}</th>
+        <th style="width: 10%;">{{ t.col_factor_verified }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for factor in factors_used %}
+      <tr>
+        <td><strong>{{ factor.activity_type }}</strong></td>
+        <td class="num tabular">{{ factor.kgco2e_per_unit }}</td>
+        <td>{{ factor.unit }}</td>
+        <td>{{ factor.source }}</td>
+        <td>{{ factor.version or factor.year or "v1.0" }}</td>
+        <td>
+          {% if factor.verified %}
+            <span class="badge badge-leaf">{{ t.verified_label }}</span>
+          {% else %}
+            <span class="badge badge-brass">{{ t.estimate_label }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- ================= PAGE 7: DISCLAIMER & GOVERNANCE ================= -->
+  <div class="page-break"></div>
+  <div class="page-header">
+    <div class="page-header-title">{{ t.section_disclaimer_title }}</div>
+    <div class="page-header-sub">Compliance & Indicative Status</div>
+  </div>
+
+  <div class="narrative-card" style="border-left: 4px solid #B5432C; margin-top: 5mm; margin-bottom: 8mm;">
+    <h4 style="color: #B5432C; font-size: 10.5pt;">{{ t.disclaimer_headline }}</h4>
+    <p style="font-size: 9pt; line-height: 1.6; color: #1D2A45;">
+      {{ t.disclaimer_body }}
+    </p>
+  </div>
+
+  <div class="subheading" style="margin-top: 10mm;">{{ t.signoff_title }}</div>
+
+  <div class="signoff-grid">
+    <div class="signoff-cell">
+      <div class="signoff-line"></div>
+      <div style="font-weight: 600; font-size: 9pt; color: #1D2A45;">{{ t.signoff_factory }}</div>
+      <div style="font-size: 8pt; color: #5A6478; margin-top: 1mm;">{{ factory.name }}</div>
+      <div style="font-size: 8pt; color: #5A6478;">{{ t.signoff_date }}: ____________________</div>
+    </div>
+    <div class="signoff-cell">
+      <div class="signoff-line"></div>
+      <div style="font-weight: 600; font-size: 9pt; color: #1D2A45;">{{ t.signoff_consultant }}</div>
+      <div style="font-size: 8pt; color: #5A6478; margin-top: 1mm;">Decarbo Industrial Solutions</div>
+      <div style="font-size: 8pt; color: #5A6478;">{{ t.signoff_date }}: ____________________</div>
+    </div>
+  </div>
+
+</body>
+</html>
