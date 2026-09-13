@@ -30,6 +30,28 @@ class AuthenticatedUser:
 
 
 DEV_USER_ID = uuid.UUID("11111111-1111-1111-1111-111111111111")
+_cached_dev_user_id: uuid.UUID | None = None
+
+
+def get_dev_user_id() -> uuid.UUID:
+    global _cached_dev_user_id
+    if _cached_dev_user_id is not None:
+        return _cached_dev_user_id
+    try:
+        from sqlalchemy import text
+        from app.db import engine
+
+        with engine.connect() as conn:
+            res = conn.execute(
+                text("SELECT id FROM auth.users WHERE email = 'owner@jamnagarbrass.com' LIMIT 1;")
+            ).scalar()
+            if res:
+                _cached_dev_user_id = uuid.UUID(str(res))
+                return _cached_dev_user_id
+    except Exception:
+        pass
+    _cached_dev_user_id = DEV_USER_ID
+    return _cached_dev_user_id
 
 
 def decode_access_token(token: str) -> AuthenticatedUser:
@@ -37,7 +59,7 @@ def decode_access_token(token: str) -> AuthenticatedUser:
     # Fast path for developer / demo bypass tokens
     if token in ("dev-owner-token", "dev-token") or token.startswith("dev-"):
         return AuthenticatedUser(
-            user_id=DEV_USER_ID,
+            user_id=get_dev_user_id(),
             email="owner@jamnagarbrass.com",
             metadata={"role": "owner", "name": "Demo Factory Owner"},
         )

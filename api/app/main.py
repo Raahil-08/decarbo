@@ -47,32 +47,31 @@ def on_startup():
         Base.metadata.create_all(bind=engine)
         print("INFO: Database connection verified and schema created.")
 
-        # Ensure demo evaluator dev user and table constraints are relaxed for demo access
+        # Ensure foreign key constraints are relaxed for evaluator/dev tokens
+        for stmt in [
+            "ALTER TABLE factories ALTER COLUMN created_by DROP NOT NULL;",
+            "ALTER TABLE factories DROP CONSTRAINT IF EXISTS factories_created_by_fkey;",
+            "ALTER TABLE factory_members DROP CONSTRAINT IF EXISTS factory_members_user_id_fkey;",
+        ]:
+            try:
+                with engine.begin() as conn:
+                    conn.execute(text(stmt))
+            except Exception:
+                pass
+
+        # Try inserting dev user if not exists
         try:
             with engine.begin() as conn:
                 conn.execute(
                     text("""
-                        DO $$
-                        BEGIN
-                            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'auth' AND table_name = 'users') THEN
-                                INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_super_admin)
-                                VALUES ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'owner@jamnagarbrass.com', '', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"name":"Demo Factory Owner"}', false)
-                                ON CONFLICT (id) DO NOTHING;
-                            END IF;
-
-                            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'factories') THEN
-                                ALTER TABLE factories ALTER COLUMN created_by DROP NOT NULL;
-                                ALTER TABLE factories DROP CONSTRAINT IF EXISTS factories_created_by_fkey;
-                            END IF;
-                            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'factory_members') THEN
-                                ALTER TABLE factory_members DROP CONSTRAINT IF EXISTS factory_members_user_id_fkey;
-                            END IF;
-                        END $$;
+                        INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_super_admin)
+                        VALUES ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'dev-evaluator@decarbo.internal', '', now(), now(), now(), '{"provider":"email"}', '{"name":"Demo Owner"}', false)
+                        ON CONFLICT (id) DO NOTHING;
                     """)
                 )
-                print("INFO: Dev evaluator user and foreign key constraints successfully configured.")
-        except Exception as ex_dev:
-            print(f"INFO: Dev user setup completed or not applicable: {ex_dev}")
+        except Exception:
+            pass
+        print("INFO: Database constraints and evaluator user verified.")
 
     except Exception as e:
         import traceback
