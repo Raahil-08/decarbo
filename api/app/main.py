@@ -39,9 +39,15 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup():
-    from app.db import Base, engine
-    import app.models.models  # ensure models are registered
-    Base.metadata.create_all(bind=engine)
+    try:
+        from app.db import Base, engine
+        import app.models.models  # ensure models are registered
+        Base.metadata.create_all(bind=engine)
+        print("INFO: Database connection verified and schema created.")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"WARNING: Database initialization skipped on startup: {e}")
 
 
 @app.exception_handler(HTTPException)
