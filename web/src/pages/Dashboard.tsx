@@ -325,8 +325,9 @@ export function Dashboard() {
     } catch (err: any) {
       console.error("Failed to quick-seed demo factory", err);
       const msg =
-        err?.error?.details?.msg ||
         err?.error?.message_key ||
+        err?.error?.code ||
+        err?.error?.details?.msg ||
         (err instanceof Error && err.message !== "Failed to fetch" ? err.message : null) ||
         (API_BASE_URL.includes("localhost")
           ? "VITE_API_URL is pointing to localhost. Set VITE_API_URL in Vercel to your deployed Render URL (e.g. https://your-app.onrender.com/api/v1) and redeploy."
