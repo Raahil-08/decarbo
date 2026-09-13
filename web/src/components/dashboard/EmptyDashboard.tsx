@@ -15,8 +15,14 @@ export function EmptyDashboard({
   const { t } = useI18n();
 
   return (
-    <div className="bg-white border border-rule rounded-2xl p-10 sm:p-14 text-center max-w-xl mx-auto my-8 shadow-sm space-y-6">
-      <div className="w-16 h-16 rounded-2xl bg-paper border border-rule flex items-center justify-center mx-auto text-ink shadow-xs">
+    <div className="bg-white/90 dark:bg-[#0c101a]/90 backdrop-blur-md border border-rule dark:border-white/[0.08] rounded-2xl p-10 sm:p-14 text-center max-w-xl mx-auto my-8 shadow-sm space-y-6 relative overflow-hidden">
+      {/* Corner Tech Accents */}
+      <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-leaf/40 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-leaf/40 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-leaf/40 pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-leaf/40 pointer-events-none" />
+
+      <div className="w-16 h-16 rounded-2xl bg-paper/80 border border-rule flex items-center justify-center mx-auto text-ink shadow-xs">
         <FileText className="w-8 h-8 text-ink" />
       </div>
 

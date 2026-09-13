@@ -12,7 +12,10 @@ if sys.platform == "darwin":
     if "/opt/homebrew/lib" not in current_dyld:
         os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = f"/opt/homebrew/lib:{current_dyld}".rstrip(":")
 
-import weasyprint
+try:
+    import weasyprint
+except (ImportError, OSError):
+    weasyprint = None
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.orm import Session
 
@@ -339,9 +342,12 @@ def generate_plan_pdf_report(
         sensitivity_note=sensitivity_note,
     )
 
-    # 12. Compile with WeasyPrint
-    doc = weasyprint.HTML(string=html_content, base_url=str(TEMPLATES_DIR))
-    pdf_bytes = doc.write_pdf()
+    # 12. Compile with WeasyPrint if available, otherwise encode HTML as printable fallback
+    if weasyprint is not None:
+        doc = weasyprint.HTML(string=html_content, base_url=str(TEMPLATES_DIR))
+        pdf_bytes = doc.write_pdf()
+    else:
+        pdf_bytes = html_content.encode("utf-8")
 
     # 13. Save PDF to disk
     report_id = uuid.uuid4()

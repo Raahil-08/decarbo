@@ -100,7 +100,7 @@ export function MaccChart({ items }: MaccChartProps) {
                 <span style="color: #D6DAE1;">Payback:</span>
                 <span style="font-weight: 600;">${raw.payback_months ? `~${raw.payback_months.toFixed(1)} months` : "Immediate / Low"}</span>
               </div>
-              ${isNegative ? '<div style="margin-top: 6px; font-size: 11px; color: #48bb78; font-weight: 500;">✓ Pays for itself over lifetime</div>' : ""}
+              ${isNegative ? '<div style="margin-top: 6px; font-size: 11px; color: #48bb78; font-weight: 500;">[NET SAVING] Pays for itself over lifetime</div>' : ""}
             </div>
           `;
         },
@@ -118,25 +118,25 @@ export function MaccChart({ items }: MaccChartProps) {
         axisLabel: {
           interval: 0,
           rotate: 35,
-          color: "#5A6478",
+          color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "#8B95A8" : "#5A6478",
           fontSize: 10,
           formatter: (value: string) => {
             return value.length > 15 ? `${value.slice(0, 13)}…` : value;
           },
         },
-        axisLine: { lineStyle: { color: "#D6DAE1" } },
+        axisLine: { lineStyle: { color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "rgba(255,255,255,0.12)" : "#D6DAE1" } },
         axisTick: { alignWithLabel: true },
       },
       yAxis: {
         type: "value",
         name: "₹ / tCO₂e Cut",
         nameTextStyle: {
-          color: "#5A6478",
+          color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "#8B95A8" : "#5A6478",
           fontSize: 11,
           align: "left",
         },
         axisLabel: {
-          color: "#5A6478",
+          color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "#8B95A8" : "#5A6478",
           fontSize: 10,
           formatter: (val: number) => {
             if (val === 0) return "₹0";
@@ -146,7 +146,7 @@ export function MaccChart({ items }: MaccChartProps) {
         },
         splitLine: {
           lineStyle: {
-            color: "#E2E8F0",
+            color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "rgba(255,255,255,0.06)" : "#E2E8F0",
             type: "dashed",
           },
         },

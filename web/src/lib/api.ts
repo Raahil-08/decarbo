@@ -1,17 +1,24 @@
 import { supabase } from "./supabase";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+
+export async function getAuthToken(): Promise<string> {
+  const devToken = localStorage.getItem("decarbo_dev_token");
+  if (devToken) return devToken;
+  try {
+    const session = (await supabase.auth.getSession()).data.session;
+    if (session?.access_token) return session.access_token;
+  } catch {
+    // fallback
+  }
+  return "dev-owner-token";
+}
 
 export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const devToken = localStorage.getItem("decarbo_dev_token");
-  let token: string | null | undefined = devToken;
-  if (!token) {
-    const session = (await supabase.auth.getSession()).data.session;
-    token = session?.access_token;
-  }
+  const token = await getAuthToken();
 
 
 

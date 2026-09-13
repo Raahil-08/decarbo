@@ -71,7 +71,7 @@ export function SankeyChart({
           draggable: true,
           label: {
             position: "right",
-            color: "#1D2A45",
+            color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "#F7F8FA" : "#1D2A45",
             fontSize: 11,
             fontFamily: "IBM Plex Sans, sans-serif",
             fontWeight: 500,
@@ -87,7 +87,13 @@ export function SankeyChart({
   }, [nodes, links]);
 
   return (
-    <div className="bg-white border border-rule rounded-xl p-6 shadow-sm space-y-4">
+    <div className="bg-white/90 dark:bg-[#0c101a]/90 backdrop-blur-md border border-rule dark:border-white/[0.08] rounded-xl p-6 shadow-sm space-y-4 relative overflow-hidden">
+      {/* Corner Tech Accents */}
+      <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t border-l border-leaf/40 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t border-r border-leaf/40 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b border-l border-leaf/40 pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b border-r border-leaf/40 pointer-events-none" />
+
       {/* Header with Title and "View as table" toggle */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-rule pb-3">
         <div>

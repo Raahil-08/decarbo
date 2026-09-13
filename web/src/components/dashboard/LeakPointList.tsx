@@ -38,20 +38,28 @@ export function LeakPointList({
   const { t } = useI18n();
 
   return (
-    <div className="bg-white border border-rule rounded-xl p-6 shadow-sm space-y-5 flex flex-col justify-between">
+    <div className="bg-white/90 dark:bg-[#0c101a]/90 backdrop-blur-md border border-rule dark:border-white/[0.08] rounded-xl p-6 shadow-sm space-y-5 flex flex-col justify-between relative overflow-hidden">
+      {/* Corner Tech Accents */}
+      <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t border-l border-ember/40 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t border-r border-ember/40 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b border-l border-ember/40 pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b border-r border-ember/40 pointer-events-none" />
+
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-rule pb-3">
           <div>
             <h3 className="text-base font-bold text-ink tracking-tight flex items-center">
-              <Flame className="w-4 h-4 text-ember mr-2" />
+              <div className="p-1 rounded bg-ember/10 border border-ember/20 text-ember mr-2">
+                <Flame className="w-3.5 h-3.5" />
+              </div>
               <span>{t("leak_points_title")}</span>
             </h3>
             <p className="text-xs text-muted mt-0.5">
               {t("leak_points_subtitle")}
             </p>
           </div>
-          <span className="text-[11px] font-mono text-muted bg-paper px-2 py-0.5 rounded border border-rule">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-muted bg-paper px-2.5 py-1 rounded border border-rule">
             Pareto 80% Cutoff
           </span>
         </div>

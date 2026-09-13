@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { DecarboLogo } from "../components/common/DecarboLogo";
 import {
   Plus,
   Building2,
@@ -13,9 +14,12 @@ import {
   Calendar,
   Sliders,
   ShieldCheck,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { apiClient } from "../lib/api";
 import { useI18n } from "../lib/i18n";
+import { useTheme } from "../lib/theme";
 import { LanguageSwitcher } from "../components/dashboard/LanguageSwitcher";
 import { TopStrip } from "../components/dashboard/TopStrip";
 import { DriftBanner } from "../components/dashboard/DriftBanner";
@@ -141,6 +145,7 @@ export function Dashboard() {
   const [loadingDemo, setLoadingDemo] = useState(false);
 
   const { t } = useI18n();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   // Load Factories List
@@ -148,8 +153,32 @@ export function Dashboard() {
     try {
       const data = await apiClient<Factory[]>("/factories");
       setFactories(data);
-      if (data.length > 0 && !selectedFactoryId) {
-        setSelectedFactoryId(data[0].id);
+      if (data.length > 0) {
+        if (!selectedFactoryId) {
+          setSelectedFactoryId(data[0].id);
+        }
+      } else {
+        // Auto-seed Jamnagar Demo unit if none exists
+        console.log("No factories found. Auto-seeding Jamnagar Demo Factory...");
+        const created = await apiClient<Factory>("/factories", {
+          method: "POST",
+          body: JSON.stringify({
+            name: "Sample Brass Components (demo)",
+            industry: "brass_components",
+            products: "Precision turned brass components and inserts",
+            city: "Jamnagar",
+            state: "Gujarat",
+            cluster: "Jamnagar Brass",
+            grid_region: "IN-GJ",
+            output_unit: "t",
+            annual_output: 540,
+            electricity_tariff_inr_per_kwh: 7.8,
+          }),
+        });
+        setFactories([created]);
+        setSelectedFactoryId(created.id);
+        await apiClient(`/factories/${created.id}/demo-seed`, { method: "POST" });
+        setRefreshTrigger((c) => c + 1);
       }
     } catch (err) {
       console.error("Failed to load factories", err);
@@ -311,25 +340,55 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-paper flex flex-col font-sans">
+    <div className="min-h-screen bg-paper flex flex-col font-sans relative overflow-x-hidden">
+      {/* Blueprint Matrix Grid Background Layer (Matches Landing Page) */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 opacity-20 dark:opacity-25"
+        style={{
+          backgroundImage:
+            "linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+          backgroundSize: "70px 70px",
+        }}
+      />
+      {/* Subtle Ambient Radial Glows */}
+      <div className="fixed top-20 right-10 w-96 h-96 bg-leaf/5 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="fixed bottom-20 left-10 w-96 h-96 bg-brass/5 rounded-full blur-3xl pointer-events-none -z-10" />
+
       {/* Top Application Header */}
-      <header className="border-b border-rule bg-white sticky top-0 z-20 shadow-xs">
+      <header className="border-b border-rule bg-white/80 dark:bg-[#07090e]/85 backdrop-blur-xl sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center text-paper font-semibold text-lg shadow-sm">
-              D
-            </div>
-            <div>
-              <span className="text-xl font-bold tracking-tight text-ink">
-                {t("app_title")}
-              </span>
-              <span className="ml-2 text-xs font-mono text-muted bg-paper px-2 py-0.5 rounded border border-rule hidden sm:inline-block">
+          <Link
+            to="/"
+            className="flex items-center space-x-3 group cursor-pointer transition-transform active:scale-95"
+            title="← Revert back to Landing Page"
+          >
+            <DecarboLogo size={32} withGlow={true} />
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold tracking-tight text-ink group-hover:text-leaf transition-colors flex items-center font-mono">
+                  <span className="text-leaf">DE</span>CARBO
+                </span>
+                <span className="text-[10px] font-mono tracking-wider text-muted border border-rule/80 px-2 py-0.5 rounded bg-paper/60 group-hover:border-leaf/40 group-hover:text-leaf transition-all flex items-center gap-1 shadow-2xs">
+                  <span>←</span>
+                  <span className="underline decoration-dotted">Landing</span>
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-muted block -mt-0.5">
                 {t("app_subtitle")}
               </span>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center space-x-3">
+            {/* Theme Switcher */}
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 rounded-md text-muted hover:text-ink hover:bg-paper transition-colors"
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4 text-brass" /> : <Moon className="w-4 h-4 text-ink" />}
+            </button>
+
             {/* Language Switcher */}
             <LanguageSwitcher />
 
@@ -406,7 +465,13 @@ export function Dashboard() {
           /* Active Factory Workspace */
           <div className="space-y-6">
             {/* Top Factory Header Bar */}
-            <div className="bg-white border border-rule rounded-xl p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="bg-white/90 dark:bg-[#0c101a]/90 backdrop-blur-md border border-rule dark:border-white/[0.08] rounded-xl p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative overflow-hidden">
+              {/* Corner Tech Accents */}
+              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-leaf/40 pointer-events-none" />
+              <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-leaf/40 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-leaf/40 pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-leaf/40 pointer-events-none" />
+
               <div>
                 <div className="flex items-center space-x-3">
                   <div className="p-2.5 rounded-xl bg-paper border border-rule text-ink shadow-xs">
@@ -417,7 +482,7 @@ export function Dashboard() {
                       <select
                         value={selectedFactoryId || ""}
                         onChange={(e) => setSelectedFactoryId(e.target.value)}
-                        className="text-lg font-bold text-ink bg-transparent border-0 border-b border-dashed border-rule focus:outline-none focus:border-ink cursor-pointer pr-4"
+                        className="text-lg font-bold text-ink bg-transparent border-0 border-b border-dashed border-rule focus:outline-none focus:border-leaf cursor-pointer pr-4"
                       >
                         {factories.map((f) => (
                           <option key={f.id} value={f.id}>
@@ -465,7 +530,7 @@ export function Dashboard() {
               <div className="flex items-center space-x-2.5">
                 <button
                   onClick={() => setIsUploadOpen(true)}
-                  className="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-ink hover:bg-ink-light transition-all shadow-sm"
+                  className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold text-white bg-ink hover:bg-ink-light transition-all shadow-sm border border-white/10"
                 >
                   <UploadCloud className="w-4 h-4 mr-1.5 text-brass" />
                   <span>{t("upload_data")}</span>
@@ -483,79 +548,32 @@ export function Dashboard() {
             </div>
 
             {/* View Navigation Tabs */}
-            <div className="border-b border-rule flex space-x-6">
-              <button
-                onClick={() => setActiveTab("overview")}
-                className={`pb-3 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-colors ${
-                  activeTab === "overview"
-                    ? "border-ink text-ink"
-                    : "border-transparent text-muted hover:text-ink"
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>{t("dashboard")}</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("plan")}
-                className={`pb-3 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-colors ${
-                  activeTab === "plan"
-                    ? "border-ink text-ink"
-                    : "border-transparent text-muted hover:text-ink"
-                }`}
-              >
-                <Sliders className="w-4 h-4" />
-                <span>{t("build_plan")}</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("simulate")}
-                className={`pb-3 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-colors ${
-                  activeTab === "simulate"
-                    ? "border-ink text-ink"
-                    : "border-transparent text-muted hover:text-ink"
-                }`}
-              >
-                <Sliders className="w-4 h-4 text-brass" />
-                <span>{t("what_if_nav_link")}</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("tracking")}
-                className={`pb-3 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-colors ${
-                  activeTab === "tracking"
-                    ? "border-ink text-ink"
-                    : "border-transparent text-muted hover:text-ink"
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4 text-leaf" />
-                <span>{t("tracking_nav_link")}</span>
-              </button>
-
-
-              <button
-                onClick={() => setActiveTab("coverage")}
-                className={`pb-3 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-colors ${
-                  activeTab === "coverage"
-                    ? "border-ink text-ink"
-                    : "border-transparent text-muted hover:text-ink"
-                }`}
-              >
-                <Calendar className="w-4 h-4" />
-                <span>12-Month Coverage</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("records")}
-                className={`pb-3 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-colors ${
-                  activeTab === "records"
-                    ? "border-ink text-ink"
-                    : "border-transparent text-muted hover:text-ink"
-                }`}
-              >
-                <Layers className="w-4 h-4" />
-                <span>Activity Records Ledger</span>
-              </button>
+            <div className="border-b border-rule flex space-x-2 sm:space-x-4 overflow-x-auto pb-px scrollbar-none">
+              {[
+                { id: "overview", label: t("dashboard"), icon: LayoutDashboard },
+                { id: "plan", label: t("build_plan"), icon: Sliders },
+                { id: "simulate", label: t("what_if_nav_link"), icon: Sliders, color: "text-brass" },
+                { id: "tracking", label: t("tracking_nav_link"), icon: ShieldCheck, color: "text-leaf" },
+                { id: "coverage", label: "12-Month Coverage", icon: Calendar },
+                { id: "records", label: "Activity Records Ledger", icon: Layers },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`pb-3 pt-1 px-3 text-xs font-mono font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-all shrink-0 ${
+                      isActive
+                        ? "border-leaf text-leaf shadow-[0_2px_10px_rgba(45,122,87,0.2)]"
+                        : "border-transparent text-muted hover:text-ink hover:border-rule"
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 ${tab.color || ""}`} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Tab 1: Phase 4 Dashboard Overview */}

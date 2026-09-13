@@ -37,6 +37,13 @@ app.add_middleware(
 )
 
 
+@app.on_event("startup")
+def on_startup():
+    from app.db import Base, engine
+    import app.models.models  # ensure models are registered
+    Base.metadata.create_all(bind=engine)
+
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     if isinstance(exc.detail, dict) and "error" in exc.detail:

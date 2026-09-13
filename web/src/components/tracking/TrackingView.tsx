@@ -15,6 +15,7 @@ import {
 import { apiClient } from "../../lib/api";
 import { formatINR, formatLakh } from "../../lib/format";
 import { useI18n } from "../../lib/i18n";
+import { useTheme } from "../../lib/theme";
 
 interface AdoptionItem {
   id: string;
@@ -61,6 +62,7 @@ interface TrackingViewProps {
 
 export function TrackingView({ factoryId }: TrackingViewProps) {
   const { t, locale } = useI18n();
+  const { theme } = useTheme();
   const [data, setData] = useState<TrackingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -203,21 +205,23 @@ export function TrackingView({ factoryId }: TrackingViewProps) {
   );
 
   // ECharts Trend Option
+  const isDark = theme === "dark";
   const trendX = data.trend.map((t) => t.month);
   const trendY = data.trend.map((t) => t.intensity);
 
   const trendOption = {
     tooltip: {
       trigger: "axis",
-      backgroundColor: "#1D2A45",
-      borderColor: "#2D7A57",
+      backgroundColor: isDark ? "#0c101a" : "#1D2A45",
+      borderColor: isDark ? "rgba(45,122,87,0.6)" : "#2D7A57",
+      borderWidth: 1,
       textStyle: { color: "#F7F8FA", fontFamily: "IBM Plex Sans, sans-serif", fontSize: 12 },
       formatter: (params: any) => {
         if (!params || params.length === 0) return "";
         const idx = params[0].dataIndex;
         const pt = data.trend[idx];
         const fixes = pt.completed_fixes && pt.completed_fixes.length > 0
-          ? `<div style="margin-top:4px; font-size:11px; color:#2D7A57">✓ Fixes completed: ${pt.completed_fixes.join(", ")}</div>`
+          ? `<div style="margin-top:4px; font-size:11px; color:#2D7A57"><span style="font-weight:700;">[COMPLETE]</span> Fixes: ${pt.completed_fixes.join(", ")}</div>`
           : "";
         return `
           <div style="font-size:12px; line-height:1.5">
@@ -238,15 +242,15 @@ export function TrackingView({ factoryId }: TrackingViewProps) {
     xAxis: {
       type: "category",
       data: trendX,
-      axisLabel: { color: "#5A6478", fontSize: 11 },
-      axisLine: { lineStyle: { color: "#D6DAE1" } },
+      axisLabel: { color: isDark ? "#8B95A8" : "#5A6478", fontSize: 11 },
+      axisLine: { lineStyle: { color: isDark ? "rgba(255,255,255,0.12)" : "#D6DAE1" } },
     },
     yAxis: {
       type: "value",
       name: "kgCO₂e / tonne",
-      nameTextStyle: { color: "#5A6478", fontSize: 11 },
-      axisLabel: { color: "#5A6478", fontSize: 11 },
-      splitLine: { lineStyle: { color: "#E5E7EB", type: "dashed" } },
+      nameTextStyle: { color: isDark ? "#8B95A8" : "#5A6478", fontSize: 11 },
+      axisLabel: { color: isDark ? "#8B95A8" : "#5A6478", fontSize: 11 },
+      splitLine: { lineStyle: { color: isDark ? "rgba(255,255,255,0.06)" : "#E5E7EB", type: "dashed" } },
     },
     series: [
       {

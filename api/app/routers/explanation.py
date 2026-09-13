@@ -1,5 +1,6 @@
 """Plan explanation API router per PRD §15.4, §15.6, §16.2 and §22 Phase 8."""
 
+import asyncio
 import json
 import logging
 import time
@@ -290,13 +291,21 @@ async def get_plan_explanation(
     if not regenerate and locale_key in existing_cache:
         cached_text = existing_cache[locale_key]
         if stream:
+            import re
+            tokens = [tok for tok in re.split(r"(\s+)", cached_text) if tok]
+
             async def cached_stream() -> AsyncIterator[str]:
-                chunk_size = 12
-                for i in range(0, len(cached_text), chunk_size):
-                    part = cached_text[i : i + chunk_size]
-                    payload = json.dumps({"text": part, "done": False, "source": "cached", "locale": locale_key})
+                for token in tokens:
+                    payload = json.dumps(
+                        {"text": token, "done": False, "source": "cached", "locale": locale_key},
+                        ensure_ascii=False,
+                    )
                     yield f"data: {payload}\n\n"
-                final_payload = json.dumps({"text": "", "done": True, "source": "cached", "locale": locale_key})
+                    await asyncio.sleep(0.008)
+                final_payload = json.dumps(
+                    {"text": "", "done": True, "source": "cached", "locale": locale_key},
+                    ensure_ascii=False,
+                )
                 yield f"data: {final_payload}\n\n"
 
             return StreamingResponse(cached_stream(), media_type="text/event-stream")
@@ -327,13 +336,21 @@ async def get_plan_explanation(
 
     # 4. Return as SSE stream or JSON
     if stream:
+        import re
+        tokens = [tok for tok in re.split(r"(\s+)", text) if tok]
+
         async def response_stream() -> AsyncIterator[str]:
-            chunk_size = 12
-            for i in range(0, len(text), chunk_size):
-                part = text[i : i + chunk_size]
-                payload = json.dumps({"text": part, "done": False, "source": source, "locale": locale_key})
+            for token in tokens:
+                payload = json.dumps(
+                    {"text": token, "done": False, "source": source, "locale": locale_key},
+                    ensure_ascii=False,
+                )
                 yield f"data: {payload}\n\n"
-            final_payload = json.dumps({"text": "", "done": True, "source": source, "locale": locale_key})
+                await asyncio.sleep(0.008)
+            final_payload = json.dumps(
+                {"text": "", "done": True, "source": source, "locale": locale_key},
+                ensure_ascii=False,
+            )
             yield f"data: {final_payload}\n\n"
 
         return StreamingResponse(response_stream(), media_type="text/event-stream")

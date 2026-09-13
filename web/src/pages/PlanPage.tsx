@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Sliders, AlertCircle } from "lucide-react";
+import { ArrowLeft, Sliders, AlertCircle, Building2, Sun, Moon } from "lucide-react";
 import { apiClient } from "../lib/api";
 import { useI18n } from "../lib/i18n";
+import { useTheme } from "../lib/theme";
 import { PlanForm } from "../components/plan/PlanForm";
 import type { PlanFormParams } from "../components/plan/PlanForm";
 import { PlanResults } from "../components/plan/PlanResults";
 import type { PlanData } from "../components/plan/PlanResults";
 import type { MaccItem } from "../components/plan/MaccChart";
 import type { FrontierPoint } from "../components/plan/BudgetFrontierChart";
-
 
 interface PlanPageProps {
   embeddedFactoryId?: string;
@@ -20,8 +20,14 @@ export function PlanPage({ embeddedFactoryId, onBackToDashboard }: PlanPageProps
   const { factoryId: paramFactoryId } = useParams<{ factoryId: string }>();
   const navigate = useNavigate();
   const { t } = useI18n();
+  const { theme, toggleTheme } = useTheme();
 
-  const activeFactoryId = embeddedFactoryId || paramFactoryId;
+  const [factories, setFactories] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedFactoryId, setSelectedFactoryId] = useState<string>(
+    embeddedFactoryId || paramFactoryId || ""
+  );
+
+  const activeFactoryId = selectedFactoryId || embeddedFactoryId || paramFactoryId;
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -31,6 +37,26 @@ export function PlanPage({ embeddedFactoryId, onBackToDashboard }: PlanPageProps
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState<boolean>(true);
   const [lastTargetPct, setLastTargetPct] = useState<number>(20);
+
+  // Auto-fetch factories if loaded directly as standalone page
+  useEffect(() => {
+    if (!embeddedFactoryId && !paramFactoryId) {
+      apiClient<Array<{ id: string; name: string }>>("/factories")
+        .then((data) => {
+          if (data && data.length > 0) {
+            setFactories(data);
+            setSelectedFactoryId(data[0].id);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch factories for planner", err);
+        });
+    } else if (embeddedFactoryId) {
+      setSelectedFactoryId(embeddedFactoryId);
+    } else if (paramFactoryId) {
+      setSelectedFactoryId(paramFactoryId);
+    }
+  }, [embeddedFactoryId, paramFactoryId]);
 
   // Load existing plans and MACC if available
   const loadExistingPlans = useCallback(async () => {
@@ -134,7 +160,7 @@ export function PlanPage({ embeddedFactoryId, onBackToDashboard }: PlanPageProps
     }
   };
 
-  return (
+  const content = (
     <div className="space-y-6">
       {/* Top Banner / Breadcrumb */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-rule shadow-xs">
@@ -169,16 +195,46 @@ export function PlanPage({ embeddedFactoryId, onBackToDashboard }: PlanPageProps
           </div>
         </div>
 
-        {plans.length > 0 && (
+        <div className="flex items-center gap-3">
+          {/* Standalone Factory Switcher */}
+          {!embeddedFactoryId && factories.length > 1 && (
+            <div className="flex items-center space-x-2">
+              <Building2 className="w-4 h-4 text-muted" />
+              <select
+                value={selectedFactoryId}
+                onChange={(e) => setSelectedFactoryId(e.target.value)}
+                className="text-xs font-semibold text-ink bg-paper border border-rule rounded-md px-2.5 py-1.5 focus:outline-none focus:border-ink"
+              >
+                {factories.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Theme Toggle */}
           <button
             type="button"
-            onClick={() => setShowForm(!showForm)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-ink bg-paper hover:bg-rule/40 rounded-md border border-rule transition-colors self-start sm:self-auto"
+            onClick={toggleTheme}
+            className="p-1.5 rounded-md text-muted hover:text-ink hover:bg-paper border border-rule transition-colors"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           >
-            <Sliders className="w-3.5 h-3.5 text-brass" />
-            <span>{showForm ? "Hide Parameters" : "Adjust Budget / Target"}</span>
+            {theme === "dark" ? <Sun className="w-4 h-4 text-brass" /> : <Moon className="w-4 h-4 text-ink" />}
           </button>
-        )}
+
+          {plans.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowForm(!showForm)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-ink bg-paper hover:bg-rule/40 rounded-md border border-rule transition-colors self-start sm:self-auto"
+            >
+              <Sliders className="w-3.5 h-3.5 text-brass" />
+              <span>{showForm ? "Hide Parameters" : "Adjust Budget / Target"}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Error alert if any */}
@@ -219,6 +275,18 @@ export function PlanPage({ embeddedFactoryId, onBackToDashboard }: PlanPageProps
           No plans generated yet. Click "Build my plan" above to optimize.
         </div>
       ) : null}
+    </div>
+  );
+
+  if (embeddedFactoryId) {
+    return content;
+  }
+
+  return (
+    <div className="min-h-screen bg-paper font-sans py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {content}
+      </div>
     </div>
   );
 }

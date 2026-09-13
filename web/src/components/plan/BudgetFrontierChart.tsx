@@ -53,7 +53,7 @@ export function BudgetFrontierChart({
         return `
           <div style="font-size:12px; line-height: 1.5;">
             <div style="font-weight:700; color:${isCurrent ? "#A97A2B" : "#F7F8FA"}; margin-bottom:4px;">
-              ${isCurrent ? "★ " : ""}Budget: ${formatINR(pt.budget_inr)} ${isCurrent ? "(Your Budget)" : ""}
+              ${isCurrent ? "<span style='color:#A97A2B;font-weight:600;'>[TARGET] </span>" : ""}Budget: ${formatINR(pt.budget_inr)} ${isCurrent ? "(Your Budget)" : ""}
             </div>
             <div>CO₂ Cut: <span style="font-weight:700; color:#2D7A57">${pt.reduction_pct.toFixed(1)}%</span> (${pt.tco2_cut.toFixed(1)} t)</div>
             <div>Capex Required: <span style="font-weight:700; font-family:monospace">${formatINR(pt.capex_inr)}</span></div>
@@ -74,23 +74,32 @@ export function BudgetFrontierChart({
       data: xData,
       axisLabel: {
         fontSize: 11,
-        color: "#5A6478",
+        color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "#8B95A8" : "#5A6478",
         fontFamily: "IBM Plex Sans, sans-serif",
       },
-      axisLine: { lineStyle: { color: "#D6DAE1" } },
+      axisLine: { lineStyle: { color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "rgba(255,255,255,0.12)" : "#D6DAE1" } },
       axisTick: { alignWithLabel: true },
     },
     yAxis: {
       type: "value",
       name: "CO₂ Cut (%)",
-      nameTextStyle: { color: "#5A6478", fontSize: 11, padding: [0, 0, 4, 0] },
+      nameTextStyle: {
+        color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "#8B95A8" : "#5A6478",
+        fontSize: 11,
+        padding: [0, 0, 4, 0]
+      },
       axisLabel: {
         formatter: "{value}%",
         fontSize: 11,
-        color: "#5A6478",
+        color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "#8B95A8" : "#5A6478",
         fontFamily: "IBM Plex Sans, sans-serif",
       },
-      splitLine: { lineStyle: { color: "#F0F2F5", type: "dashed" } },
+      splitLine: {
+        lineStyle: {
+          color: typeof document !== "undefined" && document.documentElement.classList.contains("dark") ? "rgba(255,255,255,0.06)" : "#F0F2F5",
+          type: "dashed"
+        }
+      },
     },
     series: [
       {

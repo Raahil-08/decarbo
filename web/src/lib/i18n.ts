@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 
 export type Locale = "en" | "gu" | "hi";
 
@@ -187,9 +187,11 @@ const translations: Record<Locale, Record<string, string>> = {
     ai_explanation_subtitle: "Executive summary grounded in verified calculation numbers",
     ai_grounded_badge: "Verified Grounded",
     ai_template_badge: "Deterministic Template",
-    ai_cached_badge: "Cached",
+    ai_cached_badge: "Cached Summary",
     regenerate_explanation: "Regenerate",
     explanation_loading: "Generating plain-language explanation...",
+    explanation_error: "Unable to load plan explanation. Please try again.",
+
     // Tracking (Phase 10)
     tracking_nav_link: "Tracking & Progress",
     tracking_title: "Decarbonisation Implementation & Progress",
@@ -395,9 +397,11 @@ const translations: Record<Locale, Record<string, string>> = {
     ai_explanation_subtitle: "ચકાસાયેલ ગણતરી આંકડાઓ પર આધારિત સરળ ભાષા સારાંશ",
     ai_grounded_badge: "ચકાસાયેલ આધારિત",
     ai_template_badge: "નિયમિત ટેમ્પલેટ",
-    ai_cached_badge: "કેશ્ડ",
+    ai_cached_badge: "કેશ્ડ સારાંશ",
     regenerate_explanation: "ફરી બનાવો",
     explanation_loading: "સરળ ભાષામાં સમજૂતી તૈયાર થઈ રહી છે...",
+    explanation_error: "સમજૂતી લોડ કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો.",
+
     // Tracking (Phase 10)
     tracking_nav_link: "ટ્રેકિંગ અને પ્રગતિ",
     tracking_title: "ડીકાર્બોનાઇઝેશન અમલીકરણ અને પ્રગતિ",
@@ -603,9 +607,11 @@ const translations: Record<Locale, Record<string, string>> = {
     ai_explanation_subtitle: "सत्यापित गणना आंकड़ों पर आधारित सरल भाषा सारांश",
     ai_grounded_badge: "सत्यापित आधारित",
     ai_template_badge: "नियमित टेम्पलेट",
-    ai_cached_badge: "कैश्ड",
+    ai_cached_badge: "कैश्ड सारांश",
     regenerate_explanation: "पुनः उत्पन्न करें",
     explanation_loading: "सरल भाषा में स्पष्टीकरण तैयार किया जा रहा है...",
+    explanation_error: "स्पष्टीकरण लोड नहीं हो सका। कृपया पुनः प्रयास करें।",
+
     // Tracking (Phase 10)
     tracking_nav_link: "ट्रैकिंग और प्रगति",
     tracking_title: "डीकार्बोनाइजेशन कार्यान्वयन और प्रगति",
@@ -667,15 +673,18 @@ function subscribe(callback: () => void) {
 export function useI18n() {
   const locale = useSyncExternalStore<Locale>(subscribe, getLocale, () => "en");
 
-  const t = (key: string, params?: Record<string, string | number>): string => {
-    let str = translations[locale]?.[key] || translations["en"]?.[key] || key;
-    if (params) {
-      Object.entries(params).forEach(([k, v]) => {
-        str = str.replace(`{${k}}`, String(v));
-      });
-    }
-    return str;
-  };
+  const t = useCallback(
+    (key: string, params?: Record<string, string | number>): string => {
+      let str = translations[locale]?.[key] || translations["en"]?.[key] || key;
+      if (params) {
+        Object.entries(params).forEach(([k, v]) => {
+          str = str.replace(`{${k}}`, String(v));
+        });
+      }
+      return str;
+    },
+    [locale]
+  );
 
   return { locale, setLocale, t };
 }

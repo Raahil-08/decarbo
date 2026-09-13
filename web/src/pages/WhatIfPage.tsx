@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, AlertCircle, RefreshCw, Sliders, Building2 } from "lucide-react";
+import { ArrowLeft, AlertCircle, RefreshCw, Sliders, Building2, Sun, Moon } from "lucide-react";
 import { apiClient } from "../lib/api";
 import { useI18n } from "../lib/i18n";
+import { useTheme } from "../lib/theme";
 import { SimulateLevers } from "../components/simulate/SimulateLevers";
 import type { AvailableLever, ActiveLeversState } from "../components/simulate/SimulateLevers";
 import { SimulateOutcomes } from "../components/simulate/SimulateOutcomes";
@@ -40,6 +41,7 @@ export function WhatIfPage({
   const { factoryId: paramFactoryId } = useParams<{ factoryId: string }>();
   const navigate = useNavigate();
   const { t } = useI18n();
+  const { theme, toggleTheme } = useTheme();
 
   const [factories, setFactories] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedFactoryId, setSelectedFactoryId] = useState<string>(
@@ -254,7 +256,7 @@ export function WhatIfPage({
     }
   };
 
-  return (
+  const content = (
     <div className="space-y-6">
       {/* Top Banner / Breadcrumb */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-rule shadow-xs">
@@ -288,23 +290,35 @@ export function WhatIfPage({
           </div>
         </div>
 
-        {/* Factory Switcher (if multiple and not embedded) */}
-        {!embeddedFactoryId && factories.length > 1 && (
-          <div className="flex items-center space-x-2">
-            <Building2 className="w-4 h-4 text-muted" />
-            <select
-              value={selectedFactoryId}
-              onChange={(e) => setSelectedFactoryId(e.target.value)}
-              className="text-xs font-semibold text-ink bg-paper border border-rule rounded-md px-2.5 py-1.5 focus:outline-none focus:border-ink"
-            >
-              {factories.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div className="flex items-center space-x-3">
+          {/* Factory Switcher (if multiple and not embedded) */}
+          {!embeddedFactoryId && factories.length > 1 && (
+            <div className="flex items-center space-x-2">
+              <Building2 className="w-4 h-4 text-muted" />
+              <select
+                value={selectedFactoryId}
+                onChange={(e) => setSelectedFactoryId(e.target.value)}
+                className="text-xs font-semibold text-ink bg-paper border border-rule rounded-md px-2.5 py-1.5 focus:outline-none focus:border-ink"
+              >
+                {factories.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Theme Switcher */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-1.5 rounded-md text-muted hover:text-ink hover:bg-paper border border-rule transition-colors"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4 text-brass" /> : <Moon className="w-4 h-4 text-ink" />}
+          </button>
+        </div>
       </div>
 
       {/* Error Banner */}
@@ -361,6 +375,18 @@ export function WhatIfPage({
           </div>
         </div>
       ) : null}
+    </div>
+  );
+
+  if (embeddedFactoryId) {
+    return content;
+  }
+
+  return (
+    <div className="min-h-screen bg-paper font-sans py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {content}
+      </div>
     </div>
   );
 }

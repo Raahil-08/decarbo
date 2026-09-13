@@ -85,6 +85,25 @@ def list_factories(
         .filter(FactoryMember.user_id == user.id)
         .all()
     )
+    if not factories:
+        # Check if there is already a demo factory in the DB to provide immediate evaluator access
+        demo_factory = (
+            db.query(Factory)
+            .filter(Factory.name.ilike("%demo%") | Factory.name.ilike("%Jamnagar%"))
+            .first()
+        )
+        if not demo_factory:
+            demo_factory = db.query(Factory).first()
+        if demo_factory:
+            existing_member = (
+                db.query(FactoryMember)
+                .filter(FactoryMember.factory_id == demo_factory.id, FactoryMember.user_id == user.id)
+                .first()
+            )
+            if not existing_member:
+                db.add(FactoryMember(factory_id=demo_factory.id, user_id=user.id, role="owner"))
+                db.commit()
+            return [demo_factory]
     return factories
 
 

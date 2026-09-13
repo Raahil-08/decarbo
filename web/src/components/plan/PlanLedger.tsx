@@ -90,7 +90,13 @@ export function PlanLedger({ items, totals, targetReductionPct = 20 }: PlanLedge
   };
 
   return (
-    <div className="bg-white border border-rule rounded-none shadow-xs overflow-hidden">
+    <div className="bg-white/95 dark:bg-[#0c101a]/95 backdrop-blur-md border border-rule dark:border-white/[0.08] rounded-xl shadow-xs overflow-hidden relative">
+      {/* Corner Tech Accents */}
+      <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t border-l border-leaf/40 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t border-r border-leaf/40 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b border-l border-leaf/40 pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b border-r border-leaf/40 pointer-events-none" />
+
       {/* Ledger Header */}
       <div className="px-6 py-4 border-b border-rule bg-paper/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
@@ -296,28 +302,28 @@ export function PlanLedger({ items, totals, targetReductionPct = 20 }: PlanLedge
 
           {/* Double-Ruled Totals Closing Line (PRD §17.4 Accounting Double Underline) */}
           <tfoot>
-            <tr className="border-t-2 border-b-4 border-double border-ink bg-paper/90 font-mono text-xs">
-              <td className="py-3 px-3 text-center font-bold text-ink">∑</td>
-              <td className="py-3 px-4 font-bold text-ink uppercase tracking-wider">
+            <tr className="border-t-2 border-b-4 border-double border-rule dark:border-white/20 bg-paper/80 dark:bg-[#07090e] font-mono text-xs">
+              <td className="py-3.5 px-3 text-center font-bold text-ink dark:text-white">∑</td>
+              <td className="py-3.5 px-4 font-bold text-ink dark:text-white uppercase tracking-wider">
                 {t("ledger_totals_label")}
               </td>
-              <td className="py-3 px-4 text-right font-bold text-brass text-sm">
+              <td className="py-3.5 px-4 text-right font-bold text-brass text-sm">
                 {formatINR(totals.total_capex_inr)}
               </td>
-              <td className="py-3 px-4 text-right font-bold text-leaf text-sm">
+              <td className="py-3.5 px-4 text-right font-bold text-leaf text-sm">
                 +{formatINR(totals.annual_gross_savings_inr)}
               </td>
-              <td className="py-3 px-4 text-right font-bold text-leaf text-sm">
+              <td className="py-3.5 px-4 text-right font-bold text-leaf text-sm">
                 {totals.annual_reduction_tco2e.toFixed(1)} t
               </td>
-              <td className="py-3 px-4 text-right font-bold text-ink">
+              <td className="py-3.5 px-4 text-right font-bold text-ink dark:text-white/80">
                 {totals.payback_years !== null && totals.payback_years !== undefined
                   ? `${totals.payback_years.toFixed(1)} yr`
                   : "-"}
               </td>
-              <td className="py-3 px-4 text-right font-bold text-ink text-sm">
-                <span className="text-leaf">{totals.reduction_pct.toFixed(1)}%</span>
-                <span className="text-[10px] text-muted block">cut achieved</span>
+              <td className="py-3.5 px-4 text-right font-bold text-ink dark:text-white text-sm">
+                <span className="text-leaf font-bold">{totals.reduction_pct.toFixed(1)}%</span>
+                <span className="text-[10px] text-muted dark:text-white/40 block">cut achieved</span>
               </td>
             </tr>
           </tfoot>
