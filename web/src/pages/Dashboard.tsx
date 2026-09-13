@@ -17,7 +17,8 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { apiClient, API_BASE_URL } from "../lib/api";
+import { apiClient } from "../lib/api";
+import { DEMO_FACTORY, DEMO_FACTORY_ID } from "../lib/demoData";
 import { useI18n } from "../lib/i18n";
 import { useTheme } from "../lib/theme";
 import { LanguageSwitcher } from "../components/dashboard/LanguageSwitcher";
@@ -152,36 +153,15 @@ export function Dashboard() {
   const loadFactories = useCallback(async () => {
     try {
       const data = await apiClient<Factory[]>("/factories");
-      setFactories(data);
-      if (data.length > 0) {
-        if (!selectedFactoryId) {
-          setSelectedFactoryId(data[0].id);
-        }
-      } else {
-        // Auto-seed Jamnagar Demo unit if none exists
-        console.log("No factories found. Auto-seeding Jamnagar Demo Factory...");
-        const created = await apiClient<Factory>("/factories", {
-          method: "POST",
-          body: JSON.stringify({
-            name: "Sample Brass Components (demo)",
-            industry: "brass_components",
-            products: "Precision turned brass components and inserts",
-            city: "Jamnagar",
-            state: "Gujarat",
-            cluster: "Jamnagar Brass",
-            grid_region: "IN-GJ",
-            output_unit: "t",
-            annual_output: 540,
-            electricity_tariff_inr_per_kwh: 7.8,
-          }),
-        });
-        setFactories([created]);
-        setSelectedFactoryId(created.id);
-        await apiClient(`/factories/${created.id}/demo-seed`, { method: "POST" });
-        setRefreshTrigger((c) => c + 1);
+      const list = data && data.length > 0 ? data : [DEMO_FACTORY];
+      setFactories(list);
+      if (!selectedFactoryId) {
+        setSelectedFactoryId(list[0].id);
       }
     } catch (err) {
-      console.error("Failed to load factories", err);
+      console.warn("API unreachable, falling back to in-browser Jamnagar demo factory", err);
+      setFactories([DEMO_FACTORY]);
+      setSelectedFactoryId(DEMO_FACTORY_ID);
     } finally {
       setLoading(false);
     }
@@ -299,39 +279,14 @@ export function Dashboard() {
   const handleQuickSeedDemo = async () => {
     setCreatingFactory(true);
     try {
-      const created = await apiClient<Factory>("/factories", {
-        method: "POST",
-        body: JSON.stringify({
-          name: "Sample Brass Components (demo)",
-          industry: "brass_components",
-          products: "Precision turned brass components and inserts",
-          city: "Jamnagar",
-          state: "Gujarat",
-          cluster: "Jamnagar Brass",
-          grid_region: "IN-GJ",
-          output_unit: "t",
-          annual_output: 540,
-          electricity_tariff_inr_per_kwh: 7.8,
-        }),
+      setFactories((prev) => {
+        const exists = prev.find((f) => f.id === DEMO_FACTORY_ID);
+        return exists ? prev : [DEMO_FACTORY, ...prev];
       });
-      setFactories((prev) => [...prev, created]);
-      setSelectedFactoryId(created.id);
-
-      // Seed 12-month demo records
-      await apiClient(`/factories/${created.id}/demo-seed`, {
-        method: "POST",
-      });
+      setSelectedFactoryId(DEMO_FACTORY_ID);
       setRefreshTrigger((c) => c + 1);
     } catch (err: any) {
       console.error("Failed to quick-seed demo factory", err);
-      const msg =
-        err?.error?.details?.msg ||
-        err?.error?.message_key ||
-        (err instanceof Error && err.message !== "Failed to fetch" ? err.message : null) ||
-        (API_BASE_URL.includes("localhost")
-          ? "VITE_API_URL is pointing to localhost. Set VITE_API_URL in Vercel to your deployed Render URL (e.g. https://your-app.onrender.com/api/v1) and redeploy."
-          : `Could not connect to API at ${API_BASE_URL}. Ensure your backend on Render is Live and CORS_ORIGINS includes https://decarbo.vercel.app`);
-      alert(`Failed to load demo factory: ${msg}`);
     } finally {
       setCreatingFactory(false);
     }
