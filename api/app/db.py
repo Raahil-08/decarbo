@@ -27,7 +27,7 @@ if supabase_direct_match:
         db_url = re.sub(r"://([^:]+):", rf"://\1.{project_ref}:", db_url, count=1)
     db_url = re.sub(
         rf"@db\.{project_ref}\.supabase\.co(?::\d+)?",
-        r"@aws-0-ap-south-1.pooler.supabase.com:5432",
+        r"@aws-0-ap-northeast-2.pooler.supabase.com:5432",
         db_url,
     )
 
