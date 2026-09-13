@@ -17,7 +17,7 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { apiClient } from "../lib/api";
+import { apiClient, API_BASE_URL } from "../lib/api";
 import { useI18n } from "../lib/i18n";
 import { useTheme } from "../lib/theme";
 import { LanguageSwitcher } from "../components/dashboard/LanguageSwitcher";
@@ -327,7 +327,10 @@ export function Dashboard() {
       const msg =
         err?.error?.details?.msg ||
         err?.error?.message_key ||
-        (err instanceof Error ? err.message : "Ensure API is running on port 8000.");
+        (err instanceof Error && err.message !== "Failed to fetch" ? err.message : null) ||
+        (API_BASE_URL.includes("localhost")
+          ? "VITE_API_URL is pointing to localhost. Set VITE_API_URL in Vercel to your deployed Render URL (e.g. https://your-app.onrender.com/api/v1) and redeploy."
+          : `Could not connect to API at ${API_BASE_URL}. Ensure your backend on Render is Live and CORS_ORIGINS includes https://decarbo.vercel.app`);
       alert(`Failed to load demo factory: ${msg}`);
     } finally {
       setCreatingFactory(false);
