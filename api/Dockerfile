@@ -25,12 +25,16 @@ WORKDIR /app
 # Copy dependency definitions
 COPY pyproject.toml uv.lock ./
 
-# Install python dependencies in isolated system/virtual env
-RUN uv sync --frozen --no-dev
+# Install python dependencies without the root project to cache dependencies
+RUN uv sync --frozen --no-dev --no-install-project
 
-# Copy application source and seed/template assets
+# Copy application source, readme and seed/template assets
+COPY README.md ./
 COPY app ./app
 COPY data ./data
+
+# Final sync to install the root project
+RUN uv sync --frozen --no-dev
 
 # Expose port
 EXPOSE 8000
