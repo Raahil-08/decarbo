@@ -1,0 +1,27 @@
+activity_type,region,kgco2e_per_unit,per_unit,source_name,source_url,source_version,reference_year,valid_from,valid_to,verified,notes
+grid_electricity,IN,0.710,kWh,CEA CO2 Baseline Database,https://cea.nic.in,v21.0,FY2024-25,2025-04-01,,false,Provisional weighted average for Indian national grid
+grid_electricity,IN,0.727,kWh,CEA CO2 Baseline Database,https://cea.nic.in,v20.0,FY2023-24,2024-04-01,2025-03-31,false,Weighted average for Indian national grid FY23-24
+solar_onsite_generation,GLOBAL,0.0,kWh,IPCC / GHG Protocol,,v1.0,2024,,,true,Zero direct operational emissions by definition
+diesel,GLOBAL,2.68,L,IPCC 2006 Guidelines,https://www.ipcc-nggip.iges.or.jp,2006 Vol 2,2006,,,false,"74.1 tCO2/TJ, NCV 43 GJ/t, density 0.84 kg/L"
+petrol,GLOBAL,2.29,L,IPCC 2006 Guidelines,https://www.ipcc-nggip.iges.or.jp,2006 Vol 2,2006,,,false,69.3 tCO2/TJ motor gasoline default
+furnace_oil,GLOBAL,3.13,kg,IPCC 2006 Guidelines,https://www.ipcc-nggip.iges.or.jp,2006 Vol 2,2006,,,false,"Residual fuel oil 77.4 tCO2/TJ, NCV 40.4 GJ/t"
+lpg,GLOBAL,2.98,kg,IPCC 2006 Guidelines,https://www.ipcc-nggip.iges.or.jp,2006 Vol 2,2006,,,false,"63.1 tCO2/TJ, NCV 47.3 GJ/t"
+natural_gas,GLOBAL,2.02,m**3,IPCC 2006 Guidelines,https://www.ipcc-nggip.iges.or.jp,2006 Vol 2,2006,,,false,56.1 tCO2/TJ default
+coal,IN,1.55,kg,IPCC / CEA India,,2006/2024,2024,,,false,Indian non-coking coal typical grade GCV
+biomass_briquettes,GLOBAL,0.03,kg,IPCC 2006 Guidelines,,2006 Vol 2,2006,,,false,Non-CO2 gases (CH4 and N2O) only
+brass_input_primary,GLOBAL,4.0,kg,ICE Database / LCA Estimate,https://circularecology.com,v3.0,2024,,,false,Virgin brass rod IS319 (approx 60Cu 40Zn)
+brass_input_secondary,GLOBAL,1.0,kg,ICE Database / Recycled Brass,https://circularecology.com,v3.0,2024,,,false,Secondary remelted brass rod with scrap loop
+copper_input,GLOBAL,3.8,kg,International Copper Association,https://copperalliance.org,2024,2024,,,false,Primary copper cathode / wire
+steel_input,IN,2.5,kg,Indian Steel LCA / Ministry of Steel,,2024,2024,,,false,BF-BOF Indian blast furnace steel average
+aluminium_input_primary,IN,18.0,kg,International Aluminium Institute,https://world-aluminium.org,2024,2024,,,false,Coal-powered Indian smelting grid average
+aluminium_input_secondary,GLOBAL,0.6,kg,International Aluminium Institute,https://world-aluminium.org,2024,2024,,,false,Secondary remelted aluminium ingot
+packaging_corrugated,GLOBAL,0.9,kg,UK DEFRA / ICE,https://www.gov.uk,2024,2024,,,false,Corrugated cardboard boxes
+packaging_plastic,GLOBAL,2.3,kg,UK DEFRA Conversion Factors,https://www.gov.uk,2024,2024,,,false,LDPE stretch film & polythene bags
+cutting_oil,GLOBAL,1.5,kg,DEFRA / Ecoinvent proxy,,2024,2024,,,false,Lubricants and industrial neat/soluble cutting oils
+road_freight_hgv,GLOBAL,0.10,t*km,UK DEFRA Conversion Factors,https://www.gov.uk,2024,2024,,,false,Heavy goods vehicle average laden
+road_freight_lcv,GLOBAL,0.45,t*km,UK DEFRA Conversion Factors,https://www.gov.uk,2024,2024,,,false,Light commercial vehicle (<3.5t)
+waste_metal_scrap_recycled,GLOBAL,0.021,kg,UK DEFRA Conversion Factors,https://www.gov.uk,2024,2024,,,false,Closed-loop metal scrap collection and transport
+waste_paper_recycled,GLOBAL,0.021,kg,UK DEFRA Conversion Factors,https://www.gov.uk,2024,2024,,,false,Paper and card recycling
+waste_general_landfill,GLOBAL,0.47,kg,UK DEFRA Conversion Factors,https://www.gov.uk,2024,2024,,,false,Commercial & industrial general waste to landfill
+waste_hazardous_incineration,GLOBAL,0.60,kg,DEFRA / EPA proxy,,2024,2024,,,false,Hazardous oily waste and sludge incineration
+water_supply,GLOBAL,0.15,m**3,UK DEFRA Conversion Factors,https://www.gov.uk,2024,2024,,,false,Mains / purchased tanker water treatment & distribution
