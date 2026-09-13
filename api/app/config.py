@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     LLM_ENABLED: bool = False
     LLM_MODEL_SMART: str = "claude-sonnet-5"
     LLM_MODEL_FAST: str = "claude-haiku-4-5-20251001"
-    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000,https://decarbo.vercel.app"
     RATE_LIMIT_LLM_PER_HOUR: int = 30
     DEFAULT_TARIFF_INR_PER_KWH: float = 8.0
 
@@ -26,7 +26,10 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> list[str]:
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        if "https://decarbo.vercel.app" not in origins:
+            origins.append("https://decarbo.vercel.app")
+        return origins
 
     @property
     def llm_enabled(self) -> bool:
